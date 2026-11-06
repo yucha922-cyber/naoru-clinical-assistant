@@ -1,9 +1,11 @@
 import type { WebWorkerMLCEngine, InitProgressReport } from "@mlc-ai/web-llm";
-import { buildPrompt, type PromptInput } from "./prompt";
+import type { PromptInput } from "./prompt";
 import { parseAIResponse } from "./parse";
-import { buildOutputJsonSchema } from "./jsonSchema";
+import { buildKarteJsonSchema, buildPatientJsonSchema } from "./jsonSchema";
 import type { ClinicalAIProvider, GenerateOptions } from "./provider";
-import { LOCAL_CONTEXT_WINDOW, LOCAL_MAX_OUTPUT_TOKENS, LOCAL_MODELS, type LocalModelId } from "./localModels";
+import { LOCAL_CONTEXT_WINDOW, LOCAL_MAX_TOKENS_KARTE, LOCAL_MAX_TOKENS_PATIENT, LOCAL_MODELS, type LocalModelId } from "./localModels";
+import { buildLocalKartePrompt, buildLocalPatientPrompt } from "./localPrompts";
+import { AI_SCHEMA_VERSION } from "./schema";
 
 // 端末内AI（WebLLM / WebGPU）。
 // - モデルはオープンソース（Qwen3）で無料。初回にモデルファイルをダウンロードし、ブラウザ内（Cache Storage）に保存する。
@@ -31,18 +33,31 @@ export async function checkWebGPU(): Promise<WebGPUStatus> {
 
 let engine: WebWorkerMLCEngine | null = null;
 let loadedModel: LocalModelId | null = null;
-let loading: Promise<WebWorkerMLCEngine> | null = null;
+let loading: { modelId: LocalModelId; promise: Promise<WebWorkerMLCEngine> } | null = null;
+/** 読み込み進捗の通知先（先読み中にボタンが押されたら、ボタン側の表示に切り替えるため差し替え可能にする） */
+let progressListener: ((p: LoadProgress) => void) | undefined;
 
 export type LoadProgress = { progress: number; text: string };
 
-/** モデルを読み込む（未ダウンロードならダウンロード）。読み込み済みなら何もしない */
+export const isLocalModelReady = (modelId: LocalModelId): boolean => engine !== null && loadedModel === modelId && !loading;
+
+/**
+ * モデルを読み込む（未ダウンロードならダウンロード）。
+ * - 読み込み済みなら何もしない
+ * - 同じモデルを読み込み中なら、その完了を待つ（先読みとボタン操作が重なっても二重に読み込まない）
+ */
 export async function loadLocalModel(modelId: LocalModelId, onProgress?: (p: LoadProgress) => void): Promise<WebWorkerMLCEngine> {
-  if (engine && loadedModel === modelId) return engine;
-  if (loading) await loading.catch(() => undefined);
+  if (onProgress) progressListener = onProgress;
+  if (engine && loadedModel === modelId && !loading) return engine;
+  if (loading) {
+    const current = loading;
+    await current.promise.catch(() => undefined);
+    if (engine && loadedModel === modelId) return engine;
+  }
   const webllm = await import("@mlc-ai/web-llm");
-  const report = (r: InitProgressReport) => onProgress?.({ progress: r.progress, text: r.text });
+  const report = (r: InitProgressReport) => progressListener?.({ progress: r.progress, text: r.text });
   const chatOpts = { context_window_size: LOCAL_CONTEXT_WINDOW };
-  loading = (async () => {
+  const promise = (async () => {
     if (engine) {
       engine.setInitProgressCallback(report);
       await engine.reload(modelId, chatOpts);
@@ -51,15 +66,16 @@ export async function loadLocalModel(modelId: LocalModelId, onProgress?: (p: Loa
     const worker = new Worker(new URL("./webllm.worker.ts", import.meta.url), { type: "module" });
     return webllm.CreateWebWorkerMLCEngine(worker, modelId, { initProgressCallback: report }, chatOpts);
   })();
+  loading = { modelId, promise };
   try {
-    engine = await loading;
+    engine = await promise;
     loadedModel = modelId;
     return engine;
   } catch (e) {
     loadedModel = null;
     throw e;
   } finally {
-    loading = null;
+    if (loading?.promise === promise) loading = null;
   }
 }
 
@@ -85,9 +101,54 @@ export function interruptLocalGeneration(): void {
   engine?.interruptGenerate();
 }
 
+/** 互換用: サイト内AIが読む指示文（2ステップ分）。長さの確認に使う */
 export function buildLocalPrompt(input: PromptInput): string {
-  return buildPrompt(input, { includeExample: false });
+  return `${buildLocalPatientPrompt(input)}\n${buildLocalKartePrompt(input)}`;
 }
+
+const SYSTEM = "あなたは臨床経験豊富な理学療法士です。指示に厳密に従い、日本語で、指定された JSON だけを出力します。";
+
+/** 1ステップ分の生成（JSON スキーマで出力形式を固定） */
+async function generateStep(
+  eng: WebWorkerMLCEngine,
+  prompt: string,
+  schema: Record<string, unknown>,
+  maxTokens: number,
+  opts: GenerateOptions,
+  step: LocalStep,
+): Promise<string> {
+  await eng.resetChat();
+  const stream = await eng.chat.completions.create({
+    messages: [
+      { role: "system", content: SYSTEM },
+      { role: "user", content: prompt },
+    ],
+    temperature: 0.2,
+    max_tokens: maxTokens,
+    stream: true,
+    response_format: { type: "json_object", schema: JSON.stringify(schema) },
+    extra_body: { enable_thinking: false },
+  });
+  let text = "";
+  for await (const chunk of stream) {
+    text += chunk.choices[0]?.delta?.content ?? "";
+    opts.onToken?.(text.length, step);
+  }
+  if (opts.signal?.aborted) throw new DOMException("中止しました", "AbortError");
+  return text;
+}
+
+export type LocalStep = "patient" | "karte";
+
+/** JSON テキストを安全に読む（失敗したら null） */
+const tryParse = (t: string): Record<string, unknown> | null => {
+  try {
+    const v = JSON.parse(t);
+    return v && typeof v === "object" ? (v as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+};
 
 export function createLocalProvider(modelId: LocalModelId): ClinicalAIProvider {
   const model = LOCAL_MODELS.find((m) => m.f16Id === modelId || m.f32Id === modelId)!;
@@ -97,34 +158,32 @@ export function createLocalProvider(modelId: LocalModelId): ClinicalAIProvider {
     mode: "local",
     buildRequest: buildLocalPrompt,
     parseResponse: parseAIResponse,
+    /**
+     * 「患者資料 → カルテ」の2段階で生成する。
+     * 各段階が終わるたびに onPartial で途中結果（取り込める形の JSON テキスト）を渡す。
+     * 返り値は2段階をまとめた JSON テキスト。
+     */
     async generate(input: PromptInput, opts: GenerateOptions = {}): Promise<string> {
       const eng = await loadLocalModel(modelId, opts.onLoadProgress);
-      await eng.resetChat();
       const slugs = input.selections.map((s) => s.exercise.slug);
       const onAbort = () => eng.interruptGenerate();
       opts.signal?.addEventListener("abort", onAbort, { once: true });
       try {
-        const stream = await eng.chat.completions.create({
-          messages: [
-            {
-              role: "system",
-              content: "あなたは臨床経験豊富な理学療法士です。指示に厳密に従い、日本語で、指定された JSON だけを出力します。",
-            },
-            { role: "user", content: buildLocalPrompt(input) },
-          ],
-          temperature: 0.2,
-          max_tokens: LOCAL_MAX_OUTPUT_TOKENS,
-          stream: true,
-          response_format: { type: "json_object", schema: JSON.stringify(buildOutputJsonSchema(slugs)) },
-          extra_body: { enable_thinking: false },
+        // ステップ1: 患者資料
+        const p = await generateStep(eng, buildLocalPatientPrompt(input), buildPatientJsonSchema(slugs), LOCAL_MAX_TOKENS_PATIENT, opts, "patient");
+        const pj = tryParse(p) ?? {};
+        const patientOnly = JSON.stringify({ schemaVersion: AI_SCHEMA_VERSION, karte: {}, ...pj });
+        opts.onPartial?.("patient", patientOnly);
+        // ステップ2: カルテ
+        const k = await generateStep(eng, buildLocalKartePrompt(input), buildKarteJsonSchema(), LOCAL_MAX_TOKENS_KARTE, opts, "karte");
+        const kj = tryParse(k) ?? {};
+        const karteOnly = JSON.stringify({
+          schemaVersion: AI_SCHEMA_VERSION,
+          patient: { currentPoints: [], idealPoints: [], pointsToMind: [] },
+          ...kj,
         });
-        let text = "";
-        for await (const chunk of stream) {
-          text += chunk.choices[0]?.delta?.content ?? "";
-          opts.onToken?.(text.length);
-        }
-        if (opts.signal?.aborted) throw new DOMException("中止しました", "AbortError");
-        return text;
+        opts.onPartial?.("karte", karteOnly);
+        return JSON.stringify({ schemaVersion: AI_SCHEMA_VERSION, ...pj, ...kj });
       } finally {
         opts.signal?.removeEventListener("abort", onAbort);
       }

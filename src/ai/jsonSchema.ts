@@ -56,3 +56,31 @@ export function buildOutputJsonSchema(selectedSlugs: string[]): Record<string, u
     additionalProperties: false,
   };
 }
+
+/** サイト内AI ステップ1（患者資料）用。karte は含めない */
+export function buildPatientJsonSchema(selectedSlugs: string[]): Record<string, unknown> {
+  const full = buildOutputJsonSchema(selectedSlugs) as { properties: Record<string, unknown> };
+  return {
+    type: "object",
+    properties: {
+      patient: full.properties.patient,
+      unresolvedExercises: full.properties.unresolvedExercises,
+    },
+    required: ["patient", "unresolvedExercises"],
+    additionalProperties: false,
+  };
+}
+
+/** サイト内AI ステップ2（カルテ）用。patient は含めない */
+export function buildKarteJsonSchema(): Record<string, unknown> {
+  const full = buildOutputJsonSchema([]) as { properties: Record<string, unknown> };
+  return {
+    type: "object",
+    properties: {
+      karte: full.properties.karte,
+      confirmations: full.properties.confirmations,
+    },
+    required: ["karte", "confirmations"],
+    additionalProperties: false,
+  };
+}

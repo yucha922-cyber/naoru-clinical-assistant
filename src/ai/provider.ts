@@ -15,8 +15,10 @@ export type GenerateOptions = {
   signal?: AbortSignal;
   /** モデルの読み込み（ダウンロード）進捗 */
   onLoadProgress?: (p: { progress: number; text: string }) => void;
-  /** 生成中の進捗（これまでに生成した文字数） */
-  onToken?: (chars: number) => void;
+  /** 生成中の進捗（これまでに生成した文字数。段階的に生成する Provider は段階名も渡す） */
+  onToken?: (chars: number, step?: "patient" | "karte") => void;
+  /** 段階的に生成する Provider が、各段階の結果（取り込める JSON テキスト）を渡す */
+  onPartial?: (part: "patient" | "karte", text: string) => void;
 };
 
 export interface ClinicalAIProvider {
