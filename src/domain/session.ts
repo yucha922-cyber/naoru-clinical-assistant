@@ -1,6 +1,7 @@
 import { emptyKarte, type Karte, type KarteKey } from "./karte";
 import type { AIOutput } from "../ai/schema";
 import { applyAIOutput } from "./applyAI";
+import type { BodyArea, MindIcon, PostureKey } from "../doc/postures";
 
 // 1回の施術（セッション）分の入力データ。
 // ★ この状態はブラウザのメモリ上にだけ存在し、localStorage 等には保存しません。
@@ -14,14 +15,32 @@ export type SelectedExercise = {
   note: string;
 };
 
+export type MindItem = { icon: MindIcon; text: string };
+
+/** 患者説明資料（1枚にまとめるため、文章ではなく短い箇条書きで持つ） */
 export type PatientDoc = {
-  /** ① 今のお身体の状態 */
-  currentState: string;
-  /** ② 理想のお身体の状態 */
-  idealState: string;
-  /** ③ 意識していくこと（1行1項目） */
-  pointsToMind: string;
+  /** 目標（HOPEをもとにした短いひとこと） */
+  goal: string;
+  /** ① 今のお身体の状態（1行1項目・3項目まで推奨） */
+  currentPoints: string;
+  /** ② 理想のお身体の状態（1行1項目・3項目まで推奨） */
+  idealPoints: string;
+  /** 姿勢イラスト（未選択なら null） */
+  posture: PostureKey | null;
+  /** イラストに印を付ける部位 */
+  focusAreas: BodyArea[];
+  /** ③ 意識していくこと */
+  mindItems: MindItem[];
 };
+
+export const emptyPatientDoc = (): PatientDoc => ({
+  goal: "",
+  currentPoints: "",
+  idealPoints: "",
+  posture: null,
+  focusAreas: [],
+  mindItems: [],
+});
 
 export type SessionMeta = {
   visitDate: string;
@@ -54,7 +73,7 @@ export const emptySession = (): Session => ({
   selections: [],
   pendingExercises: [],
   karte: emptyKarte(),
-  patientDoc: { currentState: "", idealState: "", pointsToMind: "" },
+  patientDoc: emptyPatientDoc(),
   confirmations: [],
 });
 
@@ -137,7 +156,10 @@ export function hasUserInput(s: Session): boolean {
     s.selections.length > 0 ||
     s.pendingExercises.length > 0 ||
     Object.values(s.karte).some((v) => v.trim() !== "") ||
-    Object.values(s.patientDoc).some((v) => v.trim() !== "")
+    s.patientDoc.goal.trim() !== "" ||
+    s.patientDoc.currentPoints.trim() !== "" ||
+    s.patientDoc.idealPoints.trim() !== "" ||
+    s.patientDoc.mindItems.length > 0
   );
 }
 

@@ -51,7 +51,10 @@ describe("parseAIResponse", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.value.karte.examination).toBe("頸椎右回旋 45°\nSpurling test 陰性");
-    expect(r.value.patient.pointsToMind).toEqual(["x", "y"]);
+    expect(r.value.patient.pointsToMind).toEqual([
+      { icon: "check", text: "x" },
+      { icon: "check", text: "y" },
+    ]);
   });
 
   it("施術者が選択していない運動は除外し、警告を出す", () => {
@@ -78,6 +81,44 @@ describe("parseAIResponse", () => {
   });
 });
 
+describe("患者資料（schemaVersion 2.0）", () => {
+  it("旧形式（currentState などの文章）も箇条書きに変換して受け付ける", () => {
+    const r = parseAIResponse(
+      JSON.stringify({
+        karte: {},
+        patient: { currentState: "首が前に出ています。肩が張りやすい状態です。", idealState: "楽な姿勢。", pointsToMind: ["パソコンは1時間ごとに休憩"] },
+      }),
+      selected,
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.patient.currentPoints).toEqual(["首が前に出ています。", "肩が張りやすい状態です。"]);
+    expect(r.value.patient.posture).toBeNull();
+    expect(r.value.patient.pointsToMind[0].icon).toBe("desk"); // アイコンは文章から推測
+  });
+
+  it("一覧に無い姿勢・部位・アイコンは取り込まない（不正な値で資料が崩れない）", () => {
+    const r = parseAIResponse(
+      JSON.stringify({
+        karte: {},
+        patient: {
+          currentPoints: ["a"],
+          idealPoints: ["b"],
+          posture: "unknown-posture",
+          focusAreas: ["neck", "spleen"],
+          pointsToMind: [{ icon: "rocket", text: "お風呂で温める" }],
+        },
+      }),
+      selected,
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.patient.posture).toBeNull();
+    expect(r.value.patient.focusAreas).toEqual(["neck"]);
+    expect(r.value.patient.pointsToMind[0].icon).toBe("bath");
+  });
+});
+
 describe("extractJson", () => {
   it("前後の説明文を除く", () => {
     expect(extractJson('はい。{"a":1} 以上です')).toBe('{"a":1}');
@@ -95,7 +136,11 @@ describe("applyAIOutput", () => {
     expect(after.karte.chiefComplaint).not.toBe("");
     expect(after.karte.history).toBe("既存の既往歴"); // AIが空欄なら既存を残す
     expect(after.selections[0].note).toBe("施術者が書いたメモ"); // 施術者の入力は上書きしない
-    expect(after.selections[1].note).toContain("あごを引く");
+    expect(after.selections[1].note).toContain("首の後ろ");
+    expect(after.patientDoc.posture).toBe("side-forward-head");
+    expect(after.patientDoc.focusAreas).toEqual(["neck", "shoulder"]);
+    expect(after.patientDoc.mindItems[0]).toEqual({ icon: "break", text: "1時間に1回は肩を回して小休憩" });
+    expect(after.patientDoc.goal).toBe("仕事のあとも肩を気にせず過ごす");
     expect(after.selections.map((s) => s.slug)).toEqual(selected); // 種目は増減しない
     expect(after.pendingExercises).toEqual(["壁を使ったドリル"]);
     expect(after.confirmations.length).toBeGreaterThan(0);

@@ -1,5 +1,6 @@
 import type { Session } from "../domain/session";
 import { emptyKarte } from "../domain/karte";
+import { emptyPatientDoc } from "../domain/session";
 
 // ★★ 架空のサンプルデータです ★★
 // 実在の患者さんとは一切関係ありません。動作確認・デモ・自動テスト専用です。
@@ -33,7 +34,7 @@ HOPE 仕事終わりも肩を気にせず過ごしたい。趣味のヨガを再
   ],
   pendingExercises: [],
   karte: emptyKarte(),
-  patientDoc: { currentState: "", idealState: "", pointsToMind: "" },
+  patientDoc: emptyPatientDoc(),
   confirmations: [],
 };
 
@@ -42,7 +43,7 @@ export const SAMPLE_AI_RESPONSE = `以下が整理結果です。
 
 \`\`\`json
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "2.0",
   "karte": {
     "planFrequency": "週1回×4回（集中期）→ 以降2週に1回",
     "chiefComplaint": "右頸部〜肩部の張り感（夕方に増悪）。発症3か月前。",
@@ -67,17 +68,28 @@ export const SAMPLE_AI_RESPONSE = `以下が整理結果です。
     "dropoutReason": ""
   },
   "patient": {
-    "currentState": "首の前側と胸の筋肉が縮こまり、頭が少し前に出た姿勢になっています。そのため右の首から肩に負担がかかりやすく、首を右に回しにくい状態です。今日の施術後は、首の回しやすさが少し改善しました。",
-    "idealState": "仕事のあとも肩を気にせず過ごせて、趣味のヨガを楽しめる状態を目指します。頭が背骨の上にのった、楽な姿勢で過ごせるようにしていきましょう。",
+    "goal": "仕事のあとも肩を気にせず過ごす",
+    "currentPoints": [
+      "頭が少し前に出た姿勢になりやすい",
+      "右の首から肩に負担がかかりやすい",
+      "首を右に回しにくい"
+    ],
+    "idealPoints": [
+      "頭が背骨の上にのった楽な姿勢",
+      "夕方でも首・肩が軽い",
+      "左右どちらにも楽に首が回る"
+    ],
+    "posture": "side-forward-head",
+    "focusAreas": ["neck", "shoulder"],
     "pointsToMind": [
-      "パソコン作業は1時間に1回、肩を回すなど小休憩をとりましょう。",
-      "画面の高さを目線に近づけ、あごが前に出ないようにしましょう。",
-      "夕方につらくなりやすいので、お昼休みにもセルフケアを取り入れましょう。"
+      { "icon": "break", "text": "1時間に1回は肩を回して小休憩" },
+      { "icon": "desk", "text": "画面は目の高さに。あごを前に出さない" },
+      { "icon": "breath", "text": "お昼休みにもセルフケアを" }
     ],
     "selfcare": [
-      { "slug": "kata-chest-stretch", "point": "胸の前が気持ちよく伸びる強さで行いましょう。" },
-      { "slug": "kubi-chin-tuck", "point": "あごを引くとき、首の後ろが伸びるのを感じましょう。" },
-      { "slug": "kubi-thoracic-extension", "point": "腰ではなく、胸の背中側を反らすイメージで行いましょう。" }
+      { "slug": "kata-chest-stretch", "point": "胸の前が気持ちよく伸びる強さで" },
+      { "slug": "kubi-chin-tuck", "point": "首の後ろが伸びるのを感じて" },
+      { "slug": "kubi-thoracic-extension", "point": "腰ではなく背中の上を反らす" }
     ]
   },
   "unresolvedExercises": ["壁を使ったドリル"],

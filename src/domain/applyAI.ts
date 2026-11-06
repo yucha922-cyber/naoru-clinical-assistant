@@ -17,7 +17,9 @@ export function applyAIOutput(session: Session, out: AIOutput): Session {
   }
 
   const keep = (next: string, prev: string) => (next.trim() !== "" ? next.trim() : prev);
-  const points = out.patient.pointsToMind.join("\n");
+  const lines = (xs: string[]) => xs.map((x) => x.trim()).filter(Boolean).join("\n");
+  const p = out.patient;
+  const prev = session.patientDoc;
 
   const notes = new Map(out.patient.selfcare.map((s) => [s.slug, (s.point ?? "").trim()]));
   const selections = session.selections.map((s) =>
@@ -36,9 +38,12 @@ export function applyAIOutput(session: Session, out: AIOutput): Session {
     selections,
     pendingExercises: pending,
     patientDoc: {
-      currentState: keep(out.patient.currentState, session.patientDoc.currentState),
-      idealState: keep(out.patient.idealState, session.patientDoc.idealState),
-      pointsToMind: keep(points, session.patientDoc.pointsToMind),
+      goal: keep(p.goal, prev.goal),
+      currentPoints: keep(lines(p.currentPoints), prev.currentPoints),
+      idealPoints: keep(lines(p.idealPoints), prev.idealPoints),
+      posture: p.posture ?? prev.posture,
+      focusAreas: p.focusAreas.length ? p.focusAreas : prev.focusAreas,
+      mindItems: p.pointsToMind.filter((m) => m.text).length ? p.pointsToMind.filter((m) => m.text) : prev.mindItems,
     },
     confirmations: out.confirmations,
   };
