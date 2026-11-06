@@ -7,6 +7,9 @@
 
 - NAORU整体のセラピスト向け「カルテ作成・患者説明資料・セルフケア連携」アプリ。
 - Vite + React + TypeScript + Tailwind CSS の **完全クライアントサイド** アプリ。サーバーは持たない。
+- 公開URL: https://yucha922-cyber.github.io/naoru-clinical-assistant/ （`main` へのマージで
+  `.github/workflows/ci-deploy.yml` が GitHub Pages に自動デプロイ）。リポジトリは **Public**。
+  コード・Issue・PR・コミットメッセージに実患者の情報や認証情報を書かない。
 - 既存のセルフケアライブラリ（`yucha922-cyber/selfexercise`）とは **完全に独立** したリポジトリ。
   - selfexercise のファイル・ページ・画像・URL を変更しない。こちらからは **読み取り専用**。
   - セルフケアデータは `npm run sync:selfcare` で読み取り、`src/data/selfcare.json` を生成する。
@@ -72,6 +75,9 @@
   ```
 
 ### マージ前チェック（すべて成功していること）
+
+PR では GitHub Actions（typecheck / lint / test / build）が自動で走る。`gh pr checks` が成功していることに加え、
+ローカルで以下も確認する。
 
 ```bash
 npm ci
