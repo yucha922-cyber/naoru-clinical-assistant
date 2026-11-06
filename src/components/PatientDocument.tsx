@@ -50,7 +50,11 @@ function ExerciseBlock({ index, exercise, selection }: { index: number; exercise
     <article className="avoid-break mt-[3.5mm] overflow-hidden rounded-[3mm] border border-navy-100" data-doc-exercise={exercise.slug}>
       <header className="flex items-center gap-[3mm] bg-navy-900 px-[4mm] py-[2mm] text-white">
         <span className="inline-flex h-[6mm] w-[6mm] shrink-0 items-center justify-center rounded-full bg-gold text-[10pt] font-bold">{index}</span>
-        <h3 className="flex-1 text-[12pt] font-bold leading-tight">{exercise.title}</h3>
+        <h3 className="flex-1 text-[12pt] font-bold leading-tight">
+          <a href={exercise.detailUrl} target="_blank" rel="noopener noreferrer" className="text-white no-underline" data-doc-link={exercise.slug}>
+            {exercise.title}
+          </a>
+        </h3>
         {selection.dosage && (
           <span className="shrink-0 rounded-full bg-white px-[3mm] py-[0.8mm] text-[9.5pt] font-bold text-navy-900">{selection.dosage}</span>
         )}
@@ -101,10 +105,17 @@ function ExerciseBlock({ index, exercise, selection }: { index: number; exercise
                 </>
               )}
             </div>
-            <div className="flex w-[21mm] shrink-0 flex-col items-center text-center">
+            {/* 紙ではQRを読み取り、PDFをスマホで見る場合はタップで開けるようリンクにする */}
+            <a
+              href={exercise.detailUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex w-[21mm] shrink-0 flex-col items-center text-center no-underline"
+              data-doc-link={exercise.slug}
+            >
               <QrCode url={exercise.detailUrl} size={72} label={`${exercise.title} の詳細ページのQRコード`} />
-              <p className="mt-[0.5mm] text-[7pt] leading-tight text-slate-600">動画・詳しい説明</p>
-            </div>
+              <span className="mt-[0.5mm] text-[7pt] font-semibold leading-tight text-sec-blue underline">動画・詳しい説明 ›</span>
+            </a>
           </div>
         </div>
       </div>
@@ -162,6 +173,9 @@ export function PatientDocument({ session, items, guides = false }: { session: S
         )}
         {items.length > 0 && (
           <Section num="4" title="今日のセルフケア" tone="navy">
+            <p className="text-[8.5pt] text-slate-600">
+              QRコードをスマホで読み取ると、動画と詳しい説明をご覧いただけます。スマホでこの資料をご覧の場合は、運動名またはQRコードをタップしてください。
+            </p>
             {items.map((it, i) => (
               <ExerciseBlock key={it.exercise.slug} index={i + 1} exercise={it.exercise} selection={it.selection} />
             ))}

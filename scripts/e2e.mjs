@@ -217,6 +217,11 @@ try {
   const pdf = await page.pdf({ path: path.join(OUT, "patient-document.pdf"), format: "A4", printBackground: true, preferCSSPageSize: true });
   const pages = (pdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? []).length;
   const hiddenUi = await page.evaluate(() => getComputedStyle(document.querySelector("header")).display === "none");
+  const pdfText = pdf.toString("latin1");
+  const linkedSlugs = ["kata-chest-stretch", "kubi-chin-tuck", "kubi-thoracic-extension", "calf-stretch"].filter((slug) =>
+    pdfText.includes(`/URI (${SITE}/selfcare/${slug}/)`),
+  );
+  check("PDF内の運動名・QRコードがタップできるリンクになっている", linkedSlugs.length === 4, `${linkedSlugs.length}/4 種目`);
   check("A4 PDF を出力できる（印刷時はアプリのUIを隠す）", pdf.length > 10000 && pages >= 1 && hiddenUi, `${pages}ページ, ${(pdf.length / 1024).toFixed(0)}KB`);
   const breaks = await page.evaluate(() =>
     Array.from(document.querySelectorAll("[data-doc-exercise]")).every((el) => getComputedStyle(el).breakInside === "avoid"),
