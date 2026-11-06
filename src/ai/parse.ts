@@ -39,8 +39,9 @@ function describeSyntaxError(json: string, error: unknown): string {
 const PATH_LABELS: Record<string, string> = {
   karte: "カルテ",
   patient: "患者資料",
-  currentState: "① 今のお身体の状態",
-  idealState: "② 理想のお身体の状態",
+  currentPoints: "① 今のお身体の状態",
+  idealPoints: "② 理想のお身体の状態",
+  goal: "目標",
   pointsToMind: "③ 意識していくこと",
   selfcare: "④ セルフケア",
 };

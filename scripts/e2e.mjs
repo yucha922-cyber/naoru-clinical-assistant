@@ -162,6 +162,30 @@ try {
   check("AIの返答（架空）を取り込める", await page.getByText("取り込みました", { exact: true }).isVisible());
   check("特定できない運動が確認待ちになる", await page.getByText("壁を使ったドリル").first().isVisible());
 
+  // 3種目（サンプル）の資料が A4 1枚に収まり、イラスト・アイコンが入ること
+  await page.getByRole("button", { name: /患者説明資料/ }).click();
+  await page.getByTestId("page-count").waitFor();
+  const pageCountText = await page.getByTestId("page-count").innerText();
+  const figures = await page.locator("#print-root svg[data-posture]").evaluateAll((els) => els.map((e) => e.getAttribute("data-posture")));
+  const focusMarks = await page.locator("#print-root svg[data-posture] [data-focus] circle").count();
+  const mindIcons = await page.locator("#print-root [data-mind-icon]").evaluateAll((els) => els.map((e) => e.getAttribute("data-mind-icon")));
+  check(
+    "資料に今・理想の姿勢イラスト、気になる部位の印、③のアイコンが入る",
+    figures.join() === "side-forward-head,side-neutral" && focusMarks > 0 && mindIcons.join() === "break,desk,breath",
+    `${figures.join(" → ")} / 印${focusMarks / 2}か所 / ${mindIcons.join(",")}`,
+  );
+  check("目標が表示される", (await page.locator("[data-doc-goal]").innerText()).includes("仕事のあとも肩を気にせず過ごす"));
+  await page.evaluate(async () => {
+    const imgs = Array.from(document.querySelectorAll("#print-root img"));
+    await Promise.all(imgs.map((i) => (i.complete ? null : new Promise((r) => { i.onload = i.onerror = r; }))));
+  });
+  await page.emulateMedia({ media: "print" });
+  const onePdf = await page.pdf({ path: path.join(OUT, "patient-document-3items.pdf"), format: "A4", printBackground: true, preferCSSPageSize: true });
+  await page.emulateMedia({ media: "screen" });
+  const onePages = (onePdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? []).length;
+  check("セルフケア3種目の資料が A4 1枚に収まる", onePages === 1 && pageCountText.includes("1枚"), `PDF ${onePages}ページ / 画面表示「${pageCountText}」`);
+  await page.getByRole("button", { name: /カルテ入力/ }).click();
+
   // カルテ
   await page.getByRole("button", { name: /カルテ$/ }).click();
   const karteOut = await page.getByTestId("karte-output").innerText();
