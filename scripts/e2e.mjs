@@ -395,6 +395,61 @@ try {
   );
   await ctx4.close();
 
+  // ---------- A4 1枚に自動で収める（内容が多い場合） ----------
+  const ctx5 = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  await routeImages(ctx5);
+  const p5 = await ctx5.newPage();
+  p5.on("dialog", (d) => d.accept());
+  await p5.goto(BASE);
+  await p5.getByRole("button", { name: "サンプル（架空）" }).click();
+  await p5.getByRole("tab", { name: "ChatGPT／Claudeにコピー" }).click();
+  await p5.getByRole("button", { name: "返答例（架空）を貼る" }).click();
+  await p5.getByRole("button", { name: "③ 取り込む" }).click();
+  await p5.getByRole("button", { name: /セルフケア選択/ }).click();
+  for (const name of ["ふくらはぎストレッチ", "ハムストリングスストレッチ", "クラムシェル"]) {
+    await p5.getByLabel("キーワード検索").fill(name);
+    await p5.locator("[data-screen=selfcare] ul > li button[aria-pressed=false]", { hasText: name }).first().click();
+  }
+  await p5.getByRole("button", { name: /患者説明資料/ }).click();
+  // 文章を多めにし、手順の文章も載せる（最も長くなる条件）
+  await p5.getByLabel("① 今のお身体の状態").fill("頭が少し前に出た姿勢になりやすい状態です\n右の首から肩にかけて負担がかかりやすい傾向です\n首を右に回しにくく、夕方に張りが強くなります\n背中の上のほうが丸くなりやすい傾向です");
+  await p5.getByText("やり方（手順）の文章も載せる").click();
+  await p5.waitForTimeout(1500);
+  const fitText = await p5.getByTestId("page-count").innerText();
+  const fitNote = await p5.getByTestId("fit-note").innerText().catch(() => "");
+  const zoomAttr = await p5.locator("#doc-content").getAttribute("data-zoom");
+  await p5.evaluate(async () => {
+    const imgs = Array.from(document.querySelectorAll("#print-root img"));
+    await Promise.all(imgs.map((i) => (i.complete ? null : new Promise((r) => { i.onload = i.onerror = r; }))));
+  });
+  await p5.emulateMedia({ media: "print" });
+  const bigPdf = await p5.pdf({ path: path.join(OUT, "patient-document-6items.pdf"), format: "A4", printBackground: true, preferCSSPageSize: true });
+  await p5.emulateMedia({ media: "screen" });
+  const bigPages = (bigPdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? []).length;
+  const sheetOk = await p5.evaluate(() => {
+    const s = document.querySelector('[data-testid="a4-sheet"]').getBoundingClientRect();
+    const c = document.querySelector("#doc-content").getBoundingClientRect();
+    return c.right <= s.right + 1 && c.left >= s.left - 1;
+  });
+  check(
+    "内容が多くても（6種目・手順あり）自動で調整して A4 1枚に収まる",
+    bigPages === 1 && fitText.includes("1枚") && sheetOk && Number(zoomAttr) >= 0.6,
+    `PDF ${bigPages}ページ / ${fitNote || fitText} / 縮小率 ${zoomAttr}`,
+  );
+  // 内容を減らすと標準の大きさに戻る
+  await p5.getByText("やり方（手順）の文章も載せる").click();
+  await p5.getByRole("button", { name: /セルフケア選択/ }).click();
+  for (const name of ["ふくらはぎストレッチ", "ハムストリングスストレッチ", "クラムシェル"]) {
+    await p5.getByLabel("キーワード検索").fill(name);
+    await p5.locator("[data-screen=selfcare] ul > li button[aria-pressed=true]", { hasText: name }).first().click();
+  }
+  await p5.getByRole("button", { name: /患者説明資料/ }).click();
+  await p5.getByLabel("① 今のお身体の状態").fill("頭が少し前に出た姿勢になりやすい");
+  await p5.waitForTimeout(1500);
+  const backZoom = await p5.locator("#doc-content").getAttribute("data-zoom");
+  check("内容を減らすと、縮小をやめて元の大きさに戻る", backZoom === "1.00", `縮小率 ${backZoom}`);
+  await ctx5.close();
+
   // ---------- 画面幅への対応 ----------
   const previewScales = [];
   for (const vp of [

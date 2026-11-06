@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useState } from "react";
 import { useApp } from "../state";
 import { findExercise } from "../data/selfcare";
 import { PatientDocument, type ResolvedSelection } from "../components/PatientDocument";
@@ -8,9 +8,7 @@ import { PostureFigure } from "../doc/PostureFigure";
 import { BODY_AREAS, MIND_ICONS, POSTURES, guessMindIcon, type MindIcon } from "../doc/postures";
 import { splitLines, type MindItem } from "../domain/session";
 
-/** 印刷時の1ページに収まる本文の高さ（A4 297mm − 上余白10mm − 下余白12mm） */
-const PAGE_CONTENT_MM = 275;
-const PX_PER_MM = 96 / 25.4;
+import { FIT_TARGET_MM, MIN_ZOOM, PAGE_CONTENT_MM, type Density } from "../doc/density";
 
 /** 箇条書き欄の目安（1枚に収めて、パッと読めるように） */
 const MAX_POINTS = 3;
@@ -23,18 +21,44 @@ export function DocumentScreen() {
   const [printing, setPrinting] = useState(false);
   const [guides, setGuides] = useState(true);
   const [showSteps, setShowSteps] = useState(false);
-  const [pages, setPages] = useState(1);
   const doc = session.patientDoc;
   const patch = (p: Partial<typeof doc>) => dispatch({ type: "setPatientDoc", patch: p });
 
-  // 資料が何ページになるかを測る（1枚に収まっているかの確認）
-  useEffect(() => {
-    const el = document.getElementById("doc-content");
-    if (!el) return;
-    const ro = new ResizeObserver(() => setPages(Math.max(1, Math.ceil(el.offsetHeight / PX_PER_MM / PAGE_CONTENT_MM - 0.005))));
-    ro.observe(el);
+  // ---- A4 1枚に自動で収める ----
+  // 高さを測り、はみ出す場合は ①写真・イラストを小さく（2段階）→ ②資料全体を縮小 の順に詰める。
+  const [fit, setFit] = useState<{ density: Density; zoom: number }>({ density: 0, zoom: 1 });
+  const [contentMm, setContentMm] = useState(0);
+  // 内容が変わったら、標準の大きさから測り直す
+  const layoutKey = JSON.stringify([doc, session.selections, session.meta, showSteps]);
+  const [prevLayoutKey, setPrevLayoutKey] = useState(layoutKey);
+  if (prevLayoutKey !== layoutKey) {
+    setPrevLayoutKey(layoutKey);
+    setFit({ density: 0, zoom: 1 });
+  }
+  useLayoutEffect(() => {
+    const content = document.getElementById("doc-content");
+    const sheet = content?.closest<HTMLElement>('[data-testid="a4-sheet"]');
+    if (!content || !sheet) return;
+    // ResizeObserver は監視開始時にも1回呼ばれる
+    const ro = new ResizeObserver(() => {
+      const sheetWidth = sheet.getBoundingClientRect().width;
+      if (sheetWidth < 10) return; // 非表示のタブでは測らない
+      // 画面上の縮小表示（FitToWidth）の影響を受けないよう、A4の幅（210mm）との比で高さを求める
+      const mm = (content.getBoundingClientRect().height / sheetWidth) * 210;
+      setContentMm(mm);
+      setFit((f) => {
+        if (mm <= FIT_TARGET_MM) return f;
+        if (f.density < 2) return { density: (f.density + 1) as Density, zoom: 1 };
+        if (f.zoom <= MIN_ZOOM) return f;
+        const next = Math.max(MIN_ZOOM, Math.floor(((f.zoom * FIT_TARGET_MM) / mm) * 100) / 100);
+        return { ...f, zoom: next < f.zoom ? next : Math.max(MIN_ZOOM, f.zoom - 0.01) };
+      });
+    });
+    ro.observe(content);
+    ro.observe(sheet);
     return () => ro.disconnect();
-  }, []);
+  }, [fit, layoutKey]);
+  const pages = contentMm > PAGE_CONTENT_MM ? Math.ceil(contentMm / PAGE_CONTENT_MM - 0.005) : 1;
 
   const pointIssues = (label: string, text: string) => {
     const lines = splitLines(text);
@@ -60,7 +84,9 @@ export function DocumentScreen() {
 
   const checks: { tone: "warn" | "error" | "info"; text: string }[] = [];
   if (pages > 1)
-    checks.push({ tone: "warn", text: `資料が ${pages} ページになります。1枚に収めるには、文章を短くするか「手順も載せる」をオフにしてください（セルフケアが4種目以上の場合は2ページになります）` });
+    checks.push({ tone: "warn", text: `最小まで縮小しても1枚に収まりません（${pages} ページ）。文章を短くするか、「手順も載せる」をオフにするか、セルフケアの種目を減らしてください` });
+  else if (fit.zoom < 0.85)
+    checks.push({ tone: "warn", text: `1枚に収めるため、資料全体を ${Math.round(fit.zoom * 100)}% に縮小しています。文字が小さいので、読みやすくするには文章を短くするか「手順も載せる」をオフにしてください` });
   if (!doc.currentPoints.trim()) checks.push({ tone: "warn", text: "① 今のお身体の状態 が未入力です（資料には表示されません）" });
   if (!doc.idealPoints.trim()) checks.push({ tone: "warn", text: "② 理想のお身体の状態 が未入力です" });
   if (!doc.mindItems.some((m) => m.text.trim())) checks.push({ tone: "warn", text: "③ 意識していくこと が未入力です" });
@@ -167,7 +193,7 @@ export function DocumentScreen() {
 
             <div>
               <p className="text-sm font-bold text-navy-900">④ 今日のセルフケア（{items.length}種目）</p>
-              <p className="mt-1 text-xs text-slate-500">施術者が選択した運動だけが表示されます。回数・ひとことはセルフケア選択画面で編集できます。1枚に収まるのは3種目までです。</p>
+              <p className="mt-1 text-xs text-slate-500">施術者が選択した運動だけが表示されます。回数・ひとことはセルフケア選択画面で編集できます。内容が多いときは、自動で写真を小さくしたり全体を縮小したりして A4 1枚に収めます。</p>
               <label className="mt-2 flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={showSteps} onChange={(e) => setShowSteps(e.target.checked)} />
                 やり方（手順）の文章も載せる
@@ -184,6 +210,15 @@ export function DocumentScreen() {
           <p className="mb-3 text-sm font-semibold" data-testid="page-count">
             {pages === 1 ? "✓ A4 1枚に収まっています" : `A4 ${pages} ページ`}
           </p>
+          {pages === 1 && (fit.density > 0 || fit.zoom < 1) && (
+            <p className="-mt-2 mb-3 text-xs text-slate-500" data-testid="fit-note">
+              1枚に収めるため自動で調整しています（
+              {[fit.density > 0 ? "写真・イラストを小さく" : null, fit.zoom < 1 ? `全体を${Math.round(fit.zoom * 100)}%に縮小` : null]
+                .filter(Boolean)
+                .join("・")}
+              ）
+            </p>
+          )}
           {checks.length === 0 ? (
             <Notice tone="ok">問題は見つかりませんでした。</Notice>
           ) : (
@@ -211,7 +246,7 @@ export function DocumentScreen() {
       <div className="print-shell rounded-2xl bg-slate-200/70 p-3 sm:p-5">
         <p className="no-print mb-2 text-center text-xs text-slate-500">資料の全体プレビュー（画面に合わせて縮小表示。印刷・PDFは実寸のA4です）</p>
         <FitToWidth>
-          <PatientDocument session={session} items={items} guides={guides} showSteps={showSteps} />
+          <PatientDocument session={session} items={items} guides={guides} showSteps={showSteps} density={fit.density} zoom={fit.zoom} />
         </FitToWidth>
       </div>
     </div>

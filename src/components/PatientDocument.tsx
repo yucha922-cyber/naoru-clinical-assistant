@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { ArrowRight, CircleCheck, Target } from "lucide-react";
 import { MIND_ICON_COMPONENTS } from "../doc/mindIcons";
 import type { Session, SelectedExercise } from "../domain/session";
@@ -9,6 +9,7 @@ import { ExerciseImage, NoImage } from "./ExerciseImage";
 import { QrCode } from "./QrCode";
 import { PostureFigure } from "../doc/PostureFigure";
 import { idealOf } from "../doc/postures";
+import { DENSITY, type Density } from "../doc/density";
 
 // 患者説明資料（A4縦・1枚を目標）の固定テンプレート。HTML/CSS で組み、ブラウザ印刷で PDF にする。
 // 構成: 目標 → ①今 と ②理想 をイラストで対比 → ③意識すること（アイコン） → ④セルフケア（別枠）
@@ -46,13 +47,13 @@ function CompareCard({
   const color = tone === "pink" ? "var(--color-sec-pink)" : "var(--color-sec-blue)";
   const bg = tone === "pink" ? "var(--color-sec-pink-bg)" : "var(--color-sec-blue-bg)";
   return (
-    <section className="avoid-break flex min-w-0 flex-col rounded-[3mm] px-[3.5mm] pb-[3mm] pt-[2.5mm]" style={{ background: bg, borderTop: `1.2mm solid ${color}` }}>
+    <section className="avoid-break flex min-w-0 flex-col rounded-[3mm] px-[3.5mm] pt-[2.5mm]" style={{ background: bg, borderTop: `1.2mm solid ${color}`, paddingBottom: "var(--pad)" }}>
       <SectionTitle num={num} title={title} color={color} />
       <div className="flex min-w-0 flex-1 items-center gap-[2mm]">
-        {figure && <div className="w-[33mm] shrink-0">{figure}</div>}
-        <ul className="min-w-0 flex-1 space-y-[2mm]">
+        {figure && <div className="shrink-0" style={{ width: "var(--fig-w)" }}>{figure}</div>}
+        <ul className="min-w-0 flex-1 space-y-[1.6mm]">
           {points.map((p, i) => (
-            <li key={i} className="flex gap-[1.8mm] text-[10.5pt] font-semibold leading-[1.45] text-navy-900">
+            <li key={i} className="flex gap-[1.8mm] font-semibold leading-[1.45] text-navy-900" style={{ fontSize: "var(--point)" }}>
               <span className="mt-[0.4mm] shrink-0" style={{ color }}>
                 {marker}
               </span>
@@ -65,7 +66,19 @@ function CompareCard({
   );
 }
 
-function ExerciseCard({ index, exercise, selection, showSteps }: { index: number; exercise: Exercise; selection: SelectedExercise; showSteps: boolean }) {
+function ExerciseCard({
+  index,
+  exercise,
+  selection,
+  showSteps,
+  qrSize,
+}: {
+  index: number;
+  exercise: Exercise;
+  selection: SelectedExercise;
+  showSteps: boolean;
+  qrSize: number;
+}) {
   const images = exercise.images.slice(0, 2);
   return (
     <article className="avoid-break flex min-w-0 flex-col overflow-hidden rounded-[3mm] border border-navy-100 bg-white" data-doc-exercise={exercise.slug}>
@@ -81,7 +94,7 @@ function ExerciseCard({ index, exercise, selection, showSteps }: { index: number
         {images.length > 0 ? (
           <div className="grid grid-cols-2 gap-[1.5mm]">
             {images.map((img) => (
-              <div key={img.url} className="relative overflow-hidden rounded-[1.5mm] bg-navy-50" style={{ height: "36mm" }}>
+              <div key={img.url} className="relative overflow-hidden rounded-[1.5mm] bg-navy-50" style={{ height: "var(--photo-h)" }}>
                 <ExerciseImage url={img.url} alt={`${exercise.title} ${img.label ?? ""}`} className="absolute inset-0 h-full w-full" />
                 {img.label && (
                   <span
@@ -96,7 +109,7 @@ function ExerciseCard({ index, exercise, selection, showSteps }: { index: number
             ))}
           </div>
         ) : (
-          <NoImage className="h-[36mm] rounded-[1.5mm]" />
+          <div style={{ height: "var(--photo-h)" }}><NoImage className="h-full rounded-[1.5mm]" /></div>
         )}
         {selection.dosage && (
           <p className="mt-[2mm] self-start rounded-full bg-[#f4ecdc] px-[2.5mm] py-[0.6mm] text-[9pt] font-bold text-navy-900">{selection.dosage}</p>
@@ -119,7 +132,7 @@ function ExerciseCard({ index, exercise, selection, showSteps }: { index: number
             )}
           </p>
           <a href={exercise.detailUrl} target="_blank" rel="noopener noreferrer" className="flex shrink-0 flex-col items-center no-underline" data-doc-link={exercise.slug}>
-            <QrCode url={exercise.detailUrl} size={62} label={`${exercise.title} の詳細ページのQRコード`} />
+            <QrCode url={exercise.detailUrl} size={qrSize} label={`${exercise.title} の詳細ページのQRコード`} />
             <span className="text-[6.5pt] font-bold text-sec-blue">動画を見る ›</span>
           </a>
         </div>
@@ -128,6 +141,7 @@ function ExerciseCard({ index, exercise, selection, showSteps }: { index: number
   );
 }
 
+
 export type ResolvedSelection = { selection: SelectedExercise; exercise: Exercise };
 
 export function PatientDocument({
@@ -135,12 +149,17 @@ export function PatientDocument({
   items,
   guides = false,
   showSteps = false,
+  density = 0,
+  zoom = 1,
 }: {
   session: Session;
   items: ResolvedSelection[];
   guides?: boolean;
   showSteps?: boolean;
+  density?: Density;
+  zoom?: number;
 }) {
+  const d = DENSITY[density];
   const { patientDoc: doc, meta } = session;
   const current = splitLines(doc.currentPoints);
   const ideal = splitLines(doc.idealPoints);
@@ -155,7 +174,24 @@ export function PatientDocument({
   return (
     <div id="print-root">
       <div className={`a4-sheet mx-auto shadow-xl ${guides ? "a4-guides" : ""}`} data-testid="a4-sheet">
-        <div id="doc-content">
+        <div
+          id="doc-content"
+          data-density={density}
+          data-zoom={zoom.toFixed(2)}
+          style={
+            {
+              "--fig-w": d.fig,
+              "--photo-h": d.photo,
+              "--gap": d.gap,
+              "--gap-sm": d.gapSm,
+              "--pad": d.pad,
+              "--point": d.point,
+              // 最後の手段: 資料全体を縮小して1枚に収める
+              // （zoom を使うと、横幅は親要素に合わせて自動で計算し直されるため、A4の幅いっぱいのまま縮小される）
+              ...(zoom < 1 ? { zoom } : {}),
+            } as CSSProperties
+          }
+        >
           <header className="flex items-center justify-between gap-[4mm] rounded-[3mm] bg-navy-900 px-[5mm] py-[3.5mm] text-white">
             <div>
               <p className="text-[8pt] font-semibold tracking-[0.35em] text-gold-light">{APP_CONFIG.clinicName}</p>
@@ -169,7 +205,7 @@ export function PatientDocument({
           </header>
 
           {doc.goal.trim() && (
-            <div className="avoid-break mt-[3mm] flex items-center gap-[3mm] rounded-full border-[0.5mm] border-gold bg-[#faf6ee] px-[4mm] py-[2mm]" data-doc-goal>
+            <div className="avoid-break flex items-center gap-[3mm] rounded-full border-[0.5mm] border-gold bg-[#faf6ee] px-[4mm] py-[1.8mm]" style={{ marginTop: "var(--gap-sm)" }} data-doc-goal>
               <span className="inline-flex shrink-0 items-center gap-[1mm] rounded-full bg-gold px-[2.5mm] py-[0.5mm] text-[8.5pt] font-bold text-white">
                 <Target size={12} strokeWidth={2.5} aria-hidden /> 目標
               </span>
@@ -178,7 +214,7 @@ export function PatientDocument({
           )}
 
           {hasCompare && (
-            <div className="mt-[3.5mm]">
+            <div style={{ marginTop: "var(--gap)" }}>
               <div className="grid items-stretch gap-[2mm]" style={{ gridTemplateColumns: "minmax(0,1fr) 7mm minmax(0,1fr)" }}>
                 <CompareCard
                   num="1"
@@ -216,7 +252,7 @@ export function PatientDocument({
           )}
 
           {mind.length > 0 && (
-            <section className="avoid-break mt-[3mm] rounded-[3mm] bg-sec-green-bg px-[3.5mm] pb-[3mm] pt-[2.5mm]" style={{ borderTop: "1.2mm solid var(--color-sec-green)" }}>
+            <section className="avoid-break rounded-[3mm] bg-sec-green-bg px-[3.5mm] pt-[2.5mm]" style={{ borderTop: "1.2mm solid var(--color-sec-green)", marginTop: "var(--gap-sm)", paddingBottom: "var(--pad)" }}>
               <SectionTitle num="3" title="意識していくこと" color="var(--color-sec-green)" />
               <ul className="grid gap-[2.5mm]" style={{ gridTemplateColumns: `repeat(${Math.min(mind.length, 3)}, minmax(0, 1fr))` }}>
                 {mind.map((m, i) => {
@@ -235,20 +271,20 @@ export function PatientDocument({
           )}
 
           {items.length > 0 && (
-            <section className="mt-[3.5mm]">
+            <section style={{ marginTop: "var(--gap)" }}>
               <SectionTitle num="4" title="今日のセルフケア" color="var(--color-navy-900)">
                 QRコード・運動名から動画が見られます
               </SectionTitle>
               <div className="grid gap-[2.5mm]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
                 {items.map((it, i) => (
-                  <ExerciseCard key={it.exercise.slug} index={i + 1} exercise={it.exercise} selection={it.selection} showSteps={showSteps} />
+                  <ExerciseCard key={it.exercise.slug} index={i + 1} exercise={it.exercise} selection={it.selection} showSteps={showSteps} qrSize={d.qr} />
                 ))}
               </div>
               {needsMemberNote && <p className="mt-[1mm] text-right text-[7pt] text-slate-500">{APP_CONFIG.memberCodeNote}</p>}
             </section>
           )}
 
-          <footer className="avoid-break mt-[3mm] flex items-end justify-between gap-[4mm] border-t border-navy-100 pt-[2mm] text-[7pt] leading-relaxed text-slate-500">
+          <footer className="avoid-break flex items-end justify-between gap-[4mm] border-t border-navy-100 pt-[2mm] text-[7pt] leading-relaxed text-slate-500" style={{ marginTop: "var(--gap-sm)" }}>
             <p className="min-w-0">{APP_CONFIG.documentDisclaimer}</p>
             <p className="shrink-0 font-semibold tracking-[0.2em] text-navy-900">{APP_CONFIG.clinicName}</p>
           </footer>
