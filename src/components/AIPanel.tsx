@@ -7,14 +7,16 @@ import { findPrivacyWarnings, type PromptInput } from "../ai/prompt";
 import { findExercise, type Exercise } from "../data/selfcare";
 import type { SelectedExercise } from "../domain/session";
 import { SAMPLE_AI_RESPONSE } from "../samples/sampleCase";
-import { LOCAL_MAX_PROMPT_CHARS, LOCAL_MODELS, resolveModelId, type LocalModelKey } from "../ai/localModels";
+import { LOCAL_EXPECTED_CHARS, LOCAL_MAX_PROMPT_CHARS, LOCAL_MODELS, resolveModelId, type LocalModelKey } from "../ai/localModels";
+import { buildLocalKartePrompt, buildLocalPatientPrompt } from "../ai/localPrompts";
+import type { AIPart } from "../domain/applyAI";
 import type { WebGPUStatus } from "../ai/localProvider";
 
 type Mode = "local" | "copy";
 type Phase =
   | { kind: "idle" }
   | { kind: "loading"; progress: number; text: string }
-  | { kind: "generating"; chars: number; seconds: number }
+  | { kind: "generating"; step: AIPart; chars: number; seconds: number; charsPerSec: number; remainingSec: number | null; patientDone: boolean }
   | { kind: "error"; message: string };
 
 // 端末内AIのコード（WebLLM）は大きいので、使うときだけ読み込む
@@ -32,6 +34,8 @@ export function AIPanel({ onEmptyMemo }: { onEmptyMemo: () => void }) {
   const [modelKey, setModelKey] = useState<LocalModelKey>(LOCAL_MODELS[0].key);
   const [downloaded, setDownloaded] = useState<Record<string, boolean>>({});
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
+  /** 先読み（画面を開いた時点でモデルをGPUに読み込んでおく）の状態 */
+  const [warm, setWarm] = useState<{ kind: "none" | "loading" | "ready" | "error"; progress?: number }>({ kind: "none" });
   const abortRef = useRef<AbortController | null>(null);
 
   const resolved = useMemo(
@@ -71,8 +75,29 @@ export function AIPanel({ onEmptyMemo }: { onEmptyMemo: () => void }) {
     };
   }, [mode, gpu]);
 
+  // C: ダウンロード済みのモデルを、画面を開いた時点で先に読み込んでおく（ボタンを押してからの待ち時間を減らす）
+  const warmKey = gpu?.ok && downloaded[modelKey] ? resolveModelId(modelKey, gpu.shaderF16) : null;
+  useEffect(() => {
+    if (mode !== "local" || !warmKey) return;
+    let alive = true;
+    loadLocal()
+      .then(async (m) => {
+        if (m.isLocalModelReady(warmKey)) {
+          if (alive) setWarm({ kind: "ready" });
+          return;
+        }
+        if (alive) setWarm({ kind: "loading", progress: 0 });
+        await m.loadLocalModel(warmKey, (p) => alive && setWarm({ kind: "loading", progress: p.progress }));
+        if (alive) setWarm({ kind: "ready" });
+      })
+      .catch(() => alive && setWarm({ kind: "error" }));
+    return () => {
+      alive = false;
+    };
+  }, [mode, warmKey]);
+
   /** AIの出力テキストを検証して反映する（コピー方式・端末内AIで共通） */
-  const importText = (text: string) => {
+  const importText = (text: string, { parts, undo = true, quiet = false }: { parts?: AIPart[]; undo?: boolean; quiet?: boolean } = {}) => {
     setImported(false);
     const result = DEFAULT_PROVIDER.parseResponse(
       text,
@@ -85,10 +110,10 @@ export function AIPanel({ onEmptyMemo }: { onEmptyMemo: () => void }) {
     }
     setErrors([]);
     setWarnings(result.warnings);
-    setUndoPoint();
-    dispatch({ type: "applyAI", output: result.value });
+    if (undo) setUndoPoint();
+    dispatch({ type: "applyAI", output: result.value, parts });
     setImported(true);
-    notify("AIの生成結果を取り込みました");
+    if (!quiet) notify("AIの生成結果を取り込みました");
     return true;
   };
 
@@ -109,7 +134,7 @@ export function AIPanel({ onEmptyMemo }: { onEmptyMemo: () => void }) {
       return;
     }
     const m = await loadLocal();
-    if (m.buildLocalPrompt(promptInput).length > LOCAL_MAX_PROMPT_CHARS) {
+    if (Math.max(buildLocalPatientPrompt(promptInput).length, buildLocalKartePrompt(promptInput).length) > LOCAL_MAX_PROMPT_CHARS) {
       setPhase({
         kind: "error",
         message: "施術メモが長すぎるため、端末内AIでは処理できません。メモを短くするか、「ChatGPT／Claudeにコピー」をお使いください。",
@@ -132,20 +157,54 @@ export function AIPanel({ onEmptyMemo }: { onEmptyMemo: () => void }) {
     setPhase({ kind: "loading", progress: 0, text: "準備中…" });
     try {
       const provider = m.createLocalProvider(modelId);
-      let startedAt = 0;
+      // E: 速さ（文字/秒）と残り時間の目安を計算する
+      let step: AIPart = "patient";
+      let stepStart = 0;
+      let rate = 0;
+      let patientDone = false;
+      let failed = false;
       const text = await provider.generate!(promptInput, {
         signal: controller.signal,
         onLoadProgress: (p) => setPhase({ kind: "loading", progress: p.progress, text: p.text }),
-        onToken: (chars) => {
-          if (startedAt === 0) startedAt = Date.now();
-          setPhase({ kind: "generating", chars, seconds: Math.round((Date.now() - startedAt) / 1000) });
+        onToken: (chars, s) => {
+          const now = Date.now();
+          if (s && s !== step) {
+            step = s;
+            stepStart = 0;
+          }
+          if (stepStart === 0) stepStart = now;
+          const seconds = (now - stepStart) / 1000;
+          if (seconds >= 2 && chars > 0) rate = chars / seconds;
+          const left = Math.max(0, LOCAL_EXPECTED_CHARS[step] - chars) + (step === "patient" ? LOCAL_EXPECTED_CHARS.karte : 0);
+          setPhase({
+            kind: "generating",
+            step,
+            chars,
+            seconds: Math.round(seconds),
+            charsPerSec: rate,
+            remainingSec: rate > 0 ? Math.round(left / rate) : null,
+            patientDone,
+          });
+        },
+        // B: 患者資料ができた時点で先に反映し、カルテはそのあと反映する
+        onPartial: (part, partText) => {
+          const ok = importText(partText, { parts: [part], undo: part === "patient", quiet: true });
+          if (!ok) failed = true;
+          if (part === "patient" && ok) {
+            patientDone = true;
+            notify("患者資料ができました（④で確認できます）。続けてカルテを作成しています");
+          }
         },
       });
       setDownloaded((d) => ({ ...d, [modelKey]: true }));
+      setWarm({ kind: "ready" });
       setAiText(text);
       setPhase({ kind: "idle" });
-      if (!importText(text)) {
+      if (failed) {
         setMode("copy"); // 取り込めなかった出力を確認・修正できるよう、貼り付け欄を表示する
+      } else {
+        setImported(true);
+        notify("カルテと患者資料を作成しました");
       }
     } catch (e) {
       if (controller.signal.aborted) {
@@ -270,13 +329,30 @@ export function AIPanel({ onEmptyMemo }: { onEmptyMemo: () => void }) {
                 </div>
               )}
               {phase.kind === "generating" && (
-                <p className="text-sm text-navy-800" aria-live="polite">
-                  ● カルテと資料を作成中… {phase.chars.toLocaleString()} 文字（{phase.seconds}秒）
-                  <span className="block text-xs text-slate-500">端末の性能により1〜5分ほどかかります。</span>
-                </p>
+                <div className="space-y-1 rounded-xl bg-navy-50 px-3 py-2 text-sm text-navy-800" aria-live="polite" data-testid="local-progress">
+                  <p className="font-semibold">
+                    {phase.step === "patient" ? "● ステップ1/2：患者資料を作成中…" : "● ステップ2/2：カルテを作成中…"}
+                  </p>
+                  {phase.patientDone && <p className="text-xs text-sec-green">✓ 患者資料は完成しています（④で確認できます）</p>}
+                  <p className="text-xs text-slate-600">
+                    {phase.chars.toLocaleString()} 文字（{phase.seconds}秒）
+                    {phase.charsPerSec > 0 && <>・速さ 約{phase.charsPerSec.toFixed(1)}文字/秒</>}
+                    {phase.remainingSec !== null ? <>・残り 約{formatSec(phase.remainingSec)}（目安）</> : <>・速さを計測中…</>}
+                  </p>
+                </div>
               )}
               {phase.kind === "error" && <Notice tone="error">{phase.message}</Notice>}
 
+              {!busy && warm.kind === "loading" && (
+                <p className="text-xs text-slate-500" data-testid="warm-status">
+                  AIを準備しています… {Math.round((warm.progress ?? 0) * 100)}%（画面を開いた時点で自動で準備しています。このままボタンを押してもOK）
+                </p>
+              )}
+              {!busy && warm.kind === "ready" && (
+                <p className="text-xs text-sec-green" data-testid="warm-status">
+                  ✓ AIの準備ができています
+                </p>
+              )}
               {busy ? (
                 <Button variant="danger" size="lg" className="w-full" onClick={cancel}>
                   中止する
@@ -373,4 +449,12 @@ export function AIPanel({ onEmptyMemo }: { onEmptyMemo: () => void }) {
       </div>
     </Card>
   );
+}
+
+/** 秒数を「1分20秒」のように表示する */
+function formatSec(sec: number): string {
+  if (sec < 60) return `${sec}秒`;
+  const m = Math.floor(sec / 60);
+  const r = sec % 60;
+  return r ? `${m}分${r}秒` : `${m}分`;
 }

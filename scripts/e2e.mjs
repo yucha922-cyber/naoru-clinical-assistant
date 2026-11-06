@@ -212,8 +212,8 @@ try {
   const dosage = page.locator('input[placeholder^="例: 左右20秒"]').last();
   await dosage.fill("30秒×2回（架空）");
   check("複数種目を選択し、回数・時間を編集できる", (await page.getByText("選択済み（4）").count()) === 1);
-  await page.waitForSelector("img[data-qr]");
-  check("QRコードが生成される", (await page.locator("img[data-qr]").count()) === 4);
+  await page.waitForSelector("[data-screen=selfcare] img[data-qr]");
+  check("QRコードが生成される", (await page.locator("[data-screen=selfcare] img[data-qr]").count()) === 4);
   check("注意事項が表示される", (await page.getByText("注意事項", { exact: true }).count()) >= 1);
 
   // 患者資料
@@ -299,6 +299,75 @@ try {
   check("画像の欠落を検出して印刷前チェックに表示", pre.includes("画像を読み込めません") && pre.includes("顎引き"));
   check("画像のない種目を案内する", pre.includes("振り子運動") && pre.includes("画像がありません"));
   await ctx2.close();
+
+  // ---------- サイト内AI: 先読み・2段階生成・速さ表示（AIモデルの代わりにテスト用の偽物を使う） ----------
+  // 実際のAIモデルはこの環境では動かせないため、localProvider の読み込みを偽物に差し替えて画面の動きを確認する。
+  const FAKE_LOCAL = `
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    let ready = false;
+    export const checkWebGPU = async () => ({ ok: true, adapter: "fake", shaderF16: true });
+    export const isModelDownloaded = async () => true;
+    export const isLocalModelReady = () => ready;
+    export async function loadLocalModel(id, onProgress) {
+      if (ready) return {};
+      for (let i = 1; i <= 6; i++) { await sleep(250); onProgress && onProgress({ progress: i / 6, text: "" }); }
+      ready = true; return {};
+    }
+    export const interruptLocalGeneration = () => {};
+    export const deleteDownloadedModel = async () => {};
+    export const buildLocalPrompt = () => "";
+    const patient = { schemaVersion: "2.0", karte: {}, unresolvedExercises: [], patient: { goal: "架空の目標です", currentPoints: ["架空の今の状態"], idealPoints: ["架空の理想の状態"], posture: "side-forward-head", focusAreas: ["neck"], pointsToMind: [{ icon: "desk", text: "架空の意識すること" }], selfcare: [] } };
+    const karte = { schemaVersion: "2.0", patient: { currentPoints: [], idealPoints: [], pointsToMind: [] }, karte: { chiefComplaint: "架空の主訴（テスト）" }, confirmations: ["架空の確認事項"] };
+    export function createLocalProvider() {
+      return { id: "fake", label: "fake", mode: "local", buildRequest: () => "", parseResponse: () => ({ ok: false, errors: [] }),
+        async generate(input, opts) {
+          await loadLocalModel("x", opts.onLoadProgress);
+          for (let i = 1; i <= 14; i++) { await sleep(250); opts.onToken(i * 40, "patient"); }
+          opts.onPartial("patient", JSON.stringify(patient));
+          for (let i = 1; i <= 24; i++) { await sleep(250); opts.onToken(i * 45, "karte"); }
+          opts.onPartial("karte", JSON.stringify(karte));
+          return JSON.stringify({ ...patient, ...karte });
+        } };
+    }`;
+  const ctx3 = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  await routeImages(ctx3);
+  await ctx3.route(/\/assets\/localProvider-[^/]+\.js$/, (route) => route.fulfill({ status: 200, contentType: "text/javascript", body: FAKE_LOCAL }));
+  const p3 = await ctx3.newPage();
+  p3.on("dialog", (d) => d.accept());
+  await p3.goto(BASE);
+  const warmTexts = [];
+  await p3.getByTestId("warm-status").waitFor({ timeout: 10000 });
+  warmTexts.push(await p3.getByTestId("warm-status").innerText());
+  await p3.getByText("✓ AIの準備ができています").waitFor({ timeout: 10000 });
+  warmTexts.push(await p3.getByTestId("warm-status").innerText());
+  check("C: 画面を開いた時点でAIを先に準備し、完了を表示する", warmTexts[0].includes("準備しています") && warmTexts[1].includes("準備ができています"), warmTexts.map((t) => t.slice(0, 20)).join(" → "));
+
+  await p3.getByRole("button", { name: "サンプル（架空）" }).click();
+  await p3.getByTestId("local-ai").getByRole("button", { name: "AIでカルテ・資料を作成" }).click();
+  const prog = p3.getByTestId("local-progress");
+  await prog.getByText("ステップ1/2：患者資料を作成中").waitFor({ timeout: 5000 });
+  await prog.getByText(/文字\/秒.*残り 約/).waitFor({ timeout: 6000 });
+  const step1Text = await prog.innerText();
+  check("E: 生成中に速さ（文字/秒）と残り時間の目安を表示する", /約[\d.]+文字\/秒/.test(step1Text) && /残り 約/.test(step1Text), step1Text.replace(/\n/g, " ").slice(0, 80));
+
+  await prog.getByText("ステップ2/2：カルテを作成中").waitFor({ timeout: 8000 });
+  const patientDoneShown = await prog.getByText("患者資料は完成しています").isVisible();
+  await p3.getByRole("button", { name: /患者説明資料/ }).click();
+  const goalWhileKarte = await p3.locator("[data-doc-goal]").innerText().catch(() => "");
+  await p3.getByRole("button", { name: /^3カルテ$|カルテ$/ }).last().click();
+  const karteWhile = await p3.locator('[data-karte-field="chiefComplaint"]').inputValue();
+  check(
+    "B: 患者資料が先に完成して④に反映され、その間カルテは作成中",
+    patientDoneShown && goalWhileKarte.includes("架空の目標です") && karteWhile === "",
+    `④の目標「${goalWhileKarte.replace(/\s+/g, "")}」/ ③の主訴「${karteWhile}」`,
+  );
+  await p3.getByRole("button", { name: /カルテ入力/ }).click();
+  const stillRunning = await prog.isVisible();
+  await p3.getByText("カルテと患者資料を作成しました").waitFor({ timeout: 15000 });
+  await p3.getByRole("button", { name: /^3カルテ$|カルテ$/ }).last().click();
+  const karteAfter = await p3.locator('[data-karte-field="chiefComplaint"]').inputValue();
+  check("B: タブを移動しても生成は続き、完了後にカルテが反映される", stillRunning && karteAfter === "架空の主訴（テスト）", `戻ったとき作成中表示=${stillRunning} / 主訴「${karteAfter}」`);
+  await ctx3.close();
 
   // ---------- 画面幅への対応 ----------
   const previewScales = [];

@@ -28,9 +28,15 @@ export const resolveModelId = (key: LocalModelKey, shaderF16: boolean): LocalMod
   return shaderF16 ? m.f16Id : m.f32Id;
 };
 
-/** プロンプトと出力を収めるための文脈長（トークン）。既定の4096では日本語のカルテが収まらない */
-export const LOCAL_CONTEXT_WINDOW = 8192;
-/** 出力の上限（トークン） */
-export const LOCAL_MAX_OUTPUT_TOKENS = 3500;
-/** これを超える長さのプロンプトは端末内AIでは扱えない可能性が高い（日本語はおおむね1文字≒1トークン） */
-export const LOCAL_MAX_PROMPT_CHARS = LOCAL_CONTEXT_WINDOW - LOCAL_MAX_OUTPUT_TOKENS - 300;
+/**
+ * 文脈長（トークン）。指示文を短くし、患者資料とカルテを分けて作るため、6144 で足りる
+ * （小さいほど GPU メモリの使用量が減り、パソコンが重くなりにくい）。
+ */
+export const LOCAL_CONTEXT_WINDOW = 6144;
+/** 各ステップの出力の上限（トークン） */
+export const LOCAL_MAX_TOKENS_PATIENT = 1200;
+export const LOCAL_MAX_TOKENS_KARTE = 2400;
+/** 残り時間の目安に使う、出力のおおよその文字数（架空サンプルでの実測: 患者資料 約540・カルテ 約1,040 文字） */
+export const LOCAL_EXPECTED_CHARS = { patient: 650, karte: 1200 } as const;
+/** これを超える長さの指示文は端末内AIでは扱えない可能性が高い（日本語はおおむね1文字≒1トークン） */
+export const LOCAL_MAX_PROMPT_CHARS = LOCAL_CONTEXT_WINDOW - LOCAL_MAX_TOKENS_KARTE - 300;

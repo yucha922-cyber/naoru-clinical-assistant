@@ -102,10 +102,19 @@ export default function App() {
       </div>
 
       <main className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
-        {tab === "input" && <InputScreen />}
-        {tab === "selfcare" && <SelfcareScreen />}
-        {tab === "karte" && <KarteScreen />}
-        {tab === "document" && <DocumentScreen />}
+        {/* タブを切り替えても各画面の状態（AIの生成中の表示・検索条件など）を残すため、隠すだけにする */}
+        <div hidden={tab !== "input"} data-screen="input">
+          <InputScreen />
+        </div>
+        <div hidden={tab !== "selfcare"} data-screen="selfcare">
+          <SelfcareScreen />
+        </div>
+        <div hidden={tab !== "karte"} data-screen="karte">
+          <KarteScreen />
+        </div>
+        <div hidden={tab !== "document"} data-screen="document">
+          <DocumentScreen />
+        </div>
       </main>
 
       {toast && (

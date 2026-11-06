@@ -1,6 +1,6 @@
 import { emptyKarte, type Karte, type KarteKey } from "./karte";
 import type { AIOutput } from "../ai/schema";
-import { applyAIOutput } from "./applyAI";
+import { applyAIOutput, type AIPart } from "./applyAI";
 import type { BodyArea, MindIcon, PostureKey } from "../doc/postures";
 
 // 1回の施術（セッション）分の入力データ。
@@ -92,7 +92,7 @@ export type SessionAction =
   | { type: "setPatientDoc"; patch: Partial<PatientDoc> }
   | { type: "setConfirmations"; items: string[] }
   /** AIの出力を「その時点の最新の状態」に反映する（生成中に編集された内容を失わないため） */
-  | { type: "applyAI"; output: AIOutput };
+  | { type: "applyAI"; output: AIOutput; parts?: AIPart[] };
 
 export function sessionReducer(state: Session, action: SessionAction): Session {
   switch (action.type) {
@@ -144,7 +144,7 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
     case "setConfirmations":
       return { ...state, confirmations: action.items };
     case "applyAI":
-      return applyAIOutput(state, action.output);
+      return applyAIOutput(state, action.output, action.parts);
   }
 }
 

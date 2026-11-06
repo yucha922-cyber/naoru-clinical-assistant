@@ -9,9 +9,18 @@ import type { Session } from "./session";
  * - ④ セルフケア: 選択済みの種目の「ひとこと」が空欄のときだけ補完。種目の追加はしない
  * - 特定できない運動: 確認待ちに追加
  */
-export function applyAIOutput(session: Session, out: AIOutput): Session {
+export type AIPart = "karte" | "patient";
+
+/**
+ * @param parts 反映する部分。サイト内AIは「患者資料 → カルテ」の2段階で作るため、片方ずつ反映できるようにする。
+ *   karte   … カルテ・確認事項
+ *   patient … 患者資料・セルフケアのひとこと・確認待ちの運動
+ */
+export function applyAIOutput(session: Session, out: AIOutput, parts: AIPart[] = ["karte", "patient"]): Session {
+  const doKarte = parts.includes("karte");
+  const doPatient = parts.includes("patient");
   const karte = { ...session.karte };
-  for (const key of KARTE_KEYS) {
+  for (const key of doKarte ? KARTE_KEYS : []) {
     const v = out.karte[key];
     if (typeof v === "string" && v.trim() !== "") karte[key] = v.trim();
   }
@@ -20,6 +29,10 @@ export function applyAIOutput(session: Session, out: AIOutput): Session {
   const lines = (xs: string[]) => xs.map((x) => x.trim()).filter(Boolean).join("\n");
   const p = out.patient;
   const prev = session.patientDoc;
+
+  if (!doPatient) {
+    return { ...session, karte, confirmations: out.confirmations };
+  }
 
   const notes = new Map(out.patient.selfcare.map((s) => [s.slug, (s.point ?? "").trim()]));
   const selections = session.selections.map((s) =>
@@ -45,6 +58,6 @@ export function applyAIOutput(session: Session, out: AIOutput): Session {
       focusAreas: p.focusAreas.length ? p.focusAreas : prev.focusAreas,
       mindItems: p.pointsToMind.filter((m) => m.text).length ? p.pointsToMind.filter((m) => m.text) : prev.mindItems,
     },
-    confirmations: out.confirmations,
+    confirmations: doKarte ? out.confirmations : session.confirmations,
   };
 }
