@@ -1,0 +1,2422 @@
+{
+  "source": {
+    "repository": "https://github.com/yucha922-cyber/selfexercise",
+    "site": "https://yucha922-cyber.github.io/selfexercise",
+    "commit": "77b76c3a84525f4365aa99614c8bd81ae435be7b"
+  },
+  "categories": {
+    "symptoms": [
+      {
+        "slug": "katakori",
+        "name": "肩こり"
+      },
+      {
+        "slug": "kubikori",
+        "name": "首こり"
+      },
+      {
+        "slug": "youtsu",
+        "name": "腰痛"
+      },
+      {
+        "slug": "zutsu",
+        "name": "頭痛"
+      },
+      {
+        "slug": "nekoze",
+        "name": "猫背"
+      },
+      {
+        "slug": "straightneck",
+        "name": "ストレートネック"
+      },
+      {
+        "slug": "sorigoshi",
+        "name": "反り腰"
+      },
+      {
+        "slug": "zakotsushinkeitsu",
+        "name": "坐骨神経痛"
+      },
+      {
+        "slug": "kokansetsutsu",
+        "name": "股関節痛"
+      },
+      {
+        "slug": "hizatsu",
+        "name": "膝痛"
+      },
+      {
+        "slug": "shijukata",
+        "name": "四十肩"
+      },
+      {
+        "slug": "gojukata",
+        "name": "五十肩"
+      },
+      {
+        "slug": "mukumi",
+        "name": "むくみ・脚のだるさ"
+      },
+      {
+        "slug": "sokuteikinmakuen",
+        "name": "足底筋膜炎"
+      }
+    ],
+    "parts": [
+      {
+        "slug": "kubi",
+        "name": "首"
+      },
+      {
+        "slug": "kata",
+        "name": "肩"
+      },
+      {
+        "slug": "hiji",
+        "name": "肘"
+      },
+      {
+        "slug": "senaka",
+        "name": "背中"
+      },
+      {
+        "slug": "koshi",
+        "name": "腰"
+      },
+      {
+        "slug": "kotsuban",
+        "name": "骨盤"
+      },
+      {
+        "slug": "kokansetsu",
+        "name": "股関節"
+      },
+      {
+        "slug": "oshiri",
+        "name": "お尻"
+      },
+      {
+        "slug": "futomomo",
+        "name": "太もも"
+      },
+      {
+        "slug": "hiza",
+        "name": "膝"
+      },
+      {
+        "slug": "fukurahagi",
+        "name": "ふくらはぎ"
+      },
+      {
+        "slug": "ashikubi",
+        "name": "足首"
+      },
+      {
+        "slug": "ashiura",
+        "name": "足裏"
+      },
+      {
+        "slug": "taikan",
+        "name": "体幹"
+      }
+    ]
+  },
+  "exercises": [
+    {
+      "id": "kata-trap-stretch",
+      "slug": "kata-trap-stretch",
+      "title": "僧帽筋ストレッチ",
+      "category": [
+        {
+          "slug": "katakori",
+          "name": "肩こり"
+        },
+        {
+          "slug": "kubikori",
+          "name": "首こり"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "kata",
+          "name": "肩"
+        },
+        {
+          "slug": "kubi",
+          "name": "首"
+        }
+      ],
+      "purpose": "デスクワークなどで硬くなった、首から肩にかけて広がる僧帽筋（上部）をやさしく伸ばし、首・肩のこりや重だるさをやわらげます。血行促進や頭痛の予防・改善にも効果的です。",
+      "instructions": [
+        "背筋を伸ばしてまっすぐ立ちます。イスに座って行ってもかまいません。",
+        "片手を頭の後ろに添え、反対の手は背中側に下ろします。",
+        "肩の力を抜き、頭を横にゆっくり倒します。",
+        "首の横から肩にかけて心地よく伸びるのを感じながら、20〜30秒キープします。",
+        "反対側も同じように行います。左右2回ずつ繰り返します。"
+      ],
+      "precautions": [
+        "肩が上がってしまうと、首に負担がかかります。肩はリラックスさせましょう。",
+        "首を前に倒すとストレッチ効果が半減します。首はまっすぐを保つのがコツです。",
+        "頭を手で強く引っ張らず、頭の重みだけで倒すイメージで行いましょう。",
+        "呼吸を止めずに、心地よい伸びを感じる範囲で行いましょう。",
+        "痛みが強い場合や、めまい・しびれがある場合は無理せず中止し、専門家にご相談ください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 1,
+      "tags": [
+        "ストレッチ",
+        "僧帽筋",
+        "デスクワーク",
+        "首",
+        "肩こり"
+      ],
+      "order": 10,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kata-trap-stretch/start.jpg",
+          "path": "public/images/kata-trap-stretch/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kata-trap-stretch/end.jpg",
+          "path": "public/images/kata-trap-stretch/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/kata-trap-stretch/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/kata-trap-stretch/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/U7pxUKHJNBs",
+      "videoMobileUrl": "https://youtube.com/shorts/-DjbXx1EbFw",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/kata-trap-stretch/",
+      "requiresMemberCode": false,
+      "sourceFile": "src/data/selfcare/kata-trap-stretch.md"
+    },
+    {
+      "id": "kata-chest-stretch",
+      "slug": "kata-chest-stretch",
+      "title": "胸筋ストレッチ",
+      "category": [
+        {
+          "slug": "katakori",
+          "name": "肩こり"
+        },
+        {
+          "slug": "nekoze",
+          "name": "猫背"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "kata",
+          "name": "肩"
+        }
+      ],
+      "purpose": "縮こまった胸の筋肉（大胸筋）を伸ばして巻き肩をリセットし、肩こりの原因となる前かがみ姿勢を改善します。",
+      "instructions": [
+        "壁の横に立ち、壁側の肘を肩の高さに上げて前腕を壁につけます。",
+        "そのまま体を壁と反対方向へゆっくりひねります。",
+        "胸の前が伸びているのを感じながら20秒キープします。",
+        "反対側も同じように行います。左右2回ずつ繰り返します。"
+      ],
+      "precautions": [
+        "肩に痛みが出る場合は肘の高さを下げて行ってください。",
+        "腕にしびれが出る場合は中止してください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 1,
+      "tags": [
+        "ストレッチ",
+        "胸",
+        "巻き肩"
+      ],
+      "order": 11,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kata-chest-stretch/start.jpg",
+          "path": "public/images/kata-chest-stretch/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kata-chest-stretch/end.jpg",
+          "path": "public/images/kata-chest-stretch/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/kata-chest-stretch/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/kata-chest-stretch/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/m6I23YNjHW0",
+      "videoMobileUrl": "https://youtube.com/shorts/i6_X0UxeZpg",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/kata-chest-stretch/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/kata-chest-stretch.md"
+    },
+    {
+      "id": "kata-lat-stretch",
+      "slug": "kata-lat-stretch",
+      "title": "広背筋ストレッチ",
+      "category": [
+        {
+          "slug": "katakori",
+          "name": "肩こり"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "kata",
+          "name": "肩"
+        },
+        {
+          "slug": "senaka",
+          "name": "背中"
+        }
+      ],
+      "purpose": "脇の下から腰にかけて広がる広背筋を伸ばし、肩甲骨や腕の動きを軽くして肩こりをやわらげます。",
+      "instructions": [
+        "背筋を伸ばして立つか、イスに座ります。",
+        "両手を頭の上へ伸ばし、右手で左の手首をつかみます。",
+        "息を吐きながら、体を右へゆっくり倒します。",
+        "左の脇腹から脇の下が伸びているのを感じながら20秒キープします。",
+        "反対側も同じように行います。左右2回ずつ繰り返します。"
+      ],
+      "precautions": [
+        "体が前に倒れないよう、真横に倒すことを意識しましょう。",
+        "腰に痛みがある場合は無理をしないでください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 1,
+      "tags": [
+        "ストレッチ",
+        "脇",
+        "背中"
+      ],
+      "order": 12,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kata-lat-stretch/start.jpg",
+          "path": "public/images/kata-lat-stretch/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kata-lat-stretch/end.jpg",
+          "path": "public/images/kata-lat-stretch/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/kata-lat-stretch/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/kata-lat-stretch/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/SLYx6kE0oxY",
+      "videoMobileUrl": "https://youtube.com/shorts/iYCIjyKFJUE",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/kata-lat-stretch/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/kata-lat-stretch.md"
+    },
+    {
+      "id": "kata-scapula-squeeze",
+      "slug": "kata-scapula-squeeze",
+      "title": "肩甲骨寄せ運動",
+      "category": [
+        {
+          "slug": "katakori",
+          "name": "肩こり"
+        },
+        {
+          "slug": "nekoze",
+          "name": "猫背"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "kata",
+          "name": "肩"
+        },
+        {
+          "slug": "senaka",
+          "name": "背中"
+        }
+      ],
+      "purpose": "壁に背中をつけた状態で腕を上下させ、肩甲骨を大きく動かします（壁エンジェル）。肩甲骨の可動域が広がり、猫背・巻き肩の改善や肩こりの予防につながります。",
+      "instructions": [
+        "壁に背中をつけて立ち、肘を90度に曲げます。",
+        "肘・手の甲・背中を壁につけ、お腹に軽く力を入れます。",
+        "肘を伸ばしながら、腕をゆっくり上に上げます。肩甲骨が上に回旋するイメージで行いましょう。",
+        "腕をゆっくり下ろし、開始姿勢に戻ります。",
+        "肩甲骨をしっかり動かす意識で、10〜15回を目安に繰り返します。"
+      ],
+      "precautions": [
+        "腕を上げるときに肩がすくまないように注意しましょう。",
+        "壁につけた状態で行うことで、正しい姿勢をキープしやすくなります。",
+        "無理のない範囲で、ゆっくり丁寧に行いましょう。",
+        "肩や腕に痛みがある場合は、無理に行わないでください。"
+      ],
+      "duration": "約2分",
+      "difficulty": 1,
+      "tags": [
+        "エクササイズ",
+        "肩甲骨",
+        "姿勢",
+        "壁エンジェル"
+      ],
+      "order": 13,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kata-scapula-squeeze/start.jpg",
+          "path": "public/images/kata-scapula-squeeze/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kata-scapula-squeeze/end.jpg",
+          "path": "public/images/kata-scapula-squeeze/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/kata-scapula-squeeze/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/kata-scapula-squeeze/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/M1V7Q8C0Uoo",
+      "videoMobileUrl": "https://youtube.com/shorts/SmeO62qRihY",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/kata-scapula-squeeze/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/kata-scapula-squeeze.md"
+    },
+    {
+      "id": "kata-scapula-roll",
+      "slug": "kata-scapula-roll",
+      "title": "肩甲骨回し",
+      "category": [
+        {
+          "slug": "katakori",
+          "name": "肩こり"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "kata",
+          "name": "肩"
+        }
+      ],
+      "purpose": "肩甲骨を大きく動かして周囲の血行を促し、こり固まった肩まわりの筋肉をほぐします。仕事の合間のリフレッシュにもおすすめです。",
+      "instructions": [
+        "背筋を伸ばして立つか、イスに座ります。",
+        "両手の指先を肩に軽く当てます。",
+        "肘で大きな円を描くように、前から後ろへ10回まわします。",
+        "続けて、後ろから前へ10回まわします。"
+      ],
+      "precautions": [
+        "肩に痛みが出る場合は円を小さくして行ってください。",
+        "呼吸を止めずに行いましょう。"
+      ],
+      "duration": "約2分",
+      "difficulty": 1,
+      "tags": [
+        "エクササイズ",
+        "肩甲骨",
+        "デスクワーク"
+      ],
+      "order": 14,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kata-scapula-roll/step1_%E9%96%8B%E5%A7%8B%E5%A7%BF%E5%8B%A2.jpg",
+          "path": "public/images/kata-scapula-roll/step1_開始姿勢.jpg",
+          "label": "①",
+          "kind": "step",
+          "caption": "開始姿勢"
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kata-scapula-roll/step2_%E8%82%98%E3%82%92%E4%B8%8A%E3%81%AB%E4%B8%8A%E3%81%91%E3%82%99%E3%82%8B.jpg",
+          "path": "public/images/kata-scapula-roll/step2_肘を上に上げる.jpg",
+          "label": "②",
+          "kind": "step",
+          "caption": "肘を上に上げる"
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kata-scapula-roll/step3_%E8%82%98%E3%81%A6%E3%82%99%E5%A4%A7%E3%81%8D%E3%81%8F%E5%86%86%E3%82%92%E6%8F%8F%E3%81%8F%E3%82%88%E3%81%86%E3%81%AB.jpg",
+          "path": "public/images/kata-scapula-roll/step3_肘で大きく円を描くように.jpg",
+          "label": "③",
+          "kind": "step",
+          "caption": "肘で大きく円を描くように"
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/kata-scapula-roll/step1_%E9%96%8B%E5%A7%8B%E5%A7%BF%E5%8B%A2.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/kata-scapula-roll/step2_%E8%82%98%E3%82%92%E4%B8%8A%E3%81%AB%E4%B8%8A%E3%81%91%E3%82%99%E3%82%8B.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/kata-scapula-roll/step3_%E8%82%98%E3%81%A6%E3%82%99%E5%A4%A7%E3%81%8D%E3%81%8F%E5%86%86%E3%82%92%E6%8F%8F%E3%81%8F%E3%82%88%E3%81%86%E3%81%AB.jpg"
+      ],
+      "videoUrl": "https://youtu.be/3_2EeZbqcjo",
+      "videoMobileUrl": "https://youtube.com/shorts/YYxTdWOUo7Y",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/kata-scapula-roll/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/kata-scapula-roll.md"
+    },
+    {
+      "id": "kata-banzai",
+      "slug": "kata-banzai",
+      "title": "タオルを使った肩・胸のストレッチ",
+      "category": [
+        {
+          "slug": "katakori",
+          "name": "肩こり"
+        },
+        {
+          "slug": "nekoze",
+          "name": "猫背"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "kata",
+          "name": "肩"
+        },
+        {
+          "slug": "senaka",
+          "name": "背中"
+        }
+      ],
+      "purpose": "タオルを持った腕を頭の上へ持ち上げて肩や胸の筋肉を伸ばし、肩こり・猫背や巻き肩の改善につなげます。呼吸が深くなり、リラックス効果も期待できます。",
+      "instructions": [
+        "背筋を伸ばして立つか、イスに座ります。",
+        "タオルの両端を、肩幅よりやや広めに持ちます。",
+        "胸を張り、肘は軽く伸ばした状態にします。",
+        "息を吸いながら、タオルを頭の上へゆっくり持ち上げます。",
+        "肩の力を抜いたまま、胸の伸びを感じたところで20〜30秒キープします。呼吸は止めずに、自然に行いましょう。",
+        "ゆっくり下ろします。20〜30秒キープを2〜3セット、1日1〜2回を目安に行いましょう。"
+      ],
+      "precautions": [
+        "肩がすくむと、肩や首に力が入り効果が半減します。肩の力を抜いてリラックスして行いましょう。",
+        "体を反らせすぎると腰に負担がかかります。反り腰にならないよう、体幹を意識しましょう。",
+        "タオルを持つ幅が狭すぎると、十分に伸びません。",
+        "肩や腕に痛みがある場合は、無理に行わないでください。",
+        "症状が改善しない場合は、専門家にご相談ください。"
+      ],
+      "duration": "約2分",
+      "difficulty": 1,
+      "tags": [
+        "ストレッチ",
+        "タオル",
+        "肩甲骨",
+        "呼吸"
+      ],
+      "order": 15,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kata-banzai/start.jpg",
+          "path": "public/images/kata-banzai/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kata-banzai/end.jpg",
+          "path": "public/images/kata-banzai/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/kata-banzai/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/kata-banzai/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/sfuNVJimhIc",
+      "videoMobileUrl": "https://youtube.com/shorts/RqAq3721Heo",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/kata-banzai/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/kata-banzai.md"
+    },
+    {
+      "id": "zenwan-flexor-stretch",
+      "slug": "zenwan-flexor-stretch",
+      "title": "前腕屈筋群ストレッチ",
+      "category": [
+        {
+          "slug": "katakori",
+          "name": "肩こり"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "hiji",
+          "name": "肘"
+        }
+      ],
+      "purpose": "手のひら側の前腕の筋肉（屈筋群）を伸ばし、パソコン作業やスマホ操作、手をよく使う作業による腕の張り・だるさをやわらげます。",
+      "instructions": [
+        "右腕を肩の高さで前に伸ばし、手のひらを上に向けます。",
+        "左手で右手の指先を持ち、手首を反らすように手前へゆっくり引きます。",
+        "前腕の手のひら側が伸びているのを感じながら20秒キープします。",
+        "反対側も同じように行います。左右2回ずつ繰り返します。"
+      ],
+      "precautions": [
+        "肘は伸ばしたまま行うとよく伸びます。痛む場合は軽く曲げてもかまいません。",
+        "手首や肘に鋭い痛み・しびれが出る場合は中止してください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 1,
+      "tags": [
+        "ストレッチ",
+        "前腕",
+        "デスクワーク",
+        "腱鞘炎予防"
+      ],
+      "order": 17,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/zenwan-flexor-stretch/start.jpg",
+          "path": "public/images/zenwan-flexor-stretch/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/zenwan-flexor-stretch/end.jpg",
+          "path": "public/images/zenwan-flexor-stretch/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/zenwan-flexor-stretch/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/zenwan-flexor-stretch/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/KV2FYcebjkw",
+      "videoMobileUrl": "https://youtube.com/shorts/FHGRHHEkpDU",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/zenwan-flexor-stretch/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/zenwan-flexor-stretch.md"
+    },
+    {
+      "id": "zenwan-extensor-stretch",
+      "slug": "zenwan-extensor-stretch",
+      "title": "前腕伸筋群ストレッチ",
+      "category": [
+        {
+          "slug": "katakori",
+          "name": "肩こり"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "hiji",
+          "name": "肘"
+        }
+      ],
+      "purpose": "手の甲側の前腕の筋肉（伸筋群）を伸ばし、マウス操作やタイピングで疲れやすい腕の外側の張りをやわらげます。テニス肘の予防にも役立ちます。",
+      "instructions": [
+        "右腕を肩の高さで前に伸ばし、手のひらを下に向けます。",
+        "手首を曲げて指先を下へ向け、左手で手の甲を持ちます。",
+        "手前へゆっくり引き、前腕の甲側が伸びているのを感じながら20秒キープします。",
+        "反対側も同じように行います。左右2回ずつ繰り返します。"
+      ],
+      "precautions": [
+        "肘は伸ばしたまま行うとよく伸びます。痛む場合は軽く曲げてもかまいません。",
+        "肘の外側に鋭い痛みが出る場合は無理をせず中止してください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 1,
+      "tags": [
+        "ストレッチ",
+        "前腕",
+        "デスクワーク",
+        "テニス肘予防"
+      ],
+      "order": 18,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/zenwan-extensor-stretch/start.jpg",
+          "path": "public/images/zenwan-extensor-stretch/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/zenwan-extensor-stretch/end.jpg",
+          "path": "public/images/zenwan-extensor-stretch/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/zenwan-extensor-stretch/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/zenwan-extensor-stretch/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/ZrR5v2oDHH0",
+      "videoMobileUrl": "https://youtube.com/shorts/TD5T0XTUPvs",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/zenwan-extensor-stretch/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/zenwan-extensor-stretch.md"
+    },
+    {
+      "id": "youtsu-cat-stretch",
+      "slug": "youtsu-cat-stretch",
+      "title": "腰痛ケア キャット&カウ",
+      "category": [
+        {
+          "slug": "youtsu",
+          "name": "腰痛"
+        },
+        {
+          "slug": "sorigoshi",
+          "name": "反り腰"
+        },
+        {
+          "slug": "nekoze",
+          "name": "猫背"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "koshi",
+          "name": "腰"
+        },
+        {
+          "slug": "senaka",
+          "name": "背中"
+        },
+        {
+          "slug": "kotsuban",
+          "name": "骨盤"
+        },
+        {
+          "slug": "taikan",
+          "name": "体幹"
+        }
+      ],
+      "purpose": "背骨を丸めたり反らせたりすることで背骨まわりの柔軟性を高め、腰や背中のこわばりをほぐして腰痛を予防します。",
+      "instructions": [
+        "四つ這いになり、肩の下に手、股関節の下にひざをセットします。",
+        "息を吐きながら背中を天井に向かって丸めます（猫のポーズ）。",
+        "息を吸いながらお腹を床に近づけ、背中を反らせます（牛のポーズ）。",
+        "呼吸に合わせてゆっくり10回繰り返します。"
+      ],
+      "precautions": [
+        "腰に鋭い痛みが出る場合は中止してください。",
+        "反らせすぎないよう、無理のない範囲で動かしましょう。",
+        "手首が痛い場合は前腕をついて行ってください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 2,
+      "tags": [
+        "ストレッチ",
+        "モビリティ",
+        "腰",
+        "体幹",
+        "キャット&カウ"
+      ],
+      "order": 20,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/youtsu-cat-stretch/step1_%E9%96%8B%E5%A7%8B%E5%A7%BF%E5%8B%A2.jpg",
+          "path": "public/images/youtsu-cat-stretch/step1_開始姿勢.jpg",
+          "label": "①",
+          "kind": "step",
+          "caption": "開始姿勢"
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/youtsu-cat-stretch/step2_%E8%83%8C%E4%B8%AD%E3%82%92%E4%B8%B8%E3%82%81%E3%82%8B.jpg",
+          "path": "public/images/youtsu-cat-stretch/step2_背中を丸める.jpg",
+          "label": "②",
+          "kind": "step",
+          "caption": "背中を丸める"
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/youtsu-cat-stretch/step3_%E8%83%8C%E4%B8%AD%E3%82%92%E5%8F%8D%E3%82%89%E3%81%99.jpg",
+          "path": "public/images/youtsu-cat-stretch/step3_背中を反らす.jpg",
+          "label": "③",
+          "kind": "step",
+          "caption": "背中を反らす"
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/youtsu-cat-stretch/step1_%E9%96%8B%E5%A7%8B%E5%A7%BF%E5%8B%A2.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/youtsu-cat-stretch/step2_%E8%83%8C%E4%B8%AD%E3%82%92%E4%B8%B8%E3%82%81%E3%82%8B.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/youtsu-cat-stretch/step3_%E8%83%8C%E4%B8%AD%E3%82%92%E5%8F%8D%E3%82%89%E3%81%99.jpg"
+      ],
+      "videoUrl": "https://youtu.be/DegvKET9VmY",
+      "videoMobileUrl": "https://youtube.com/shorts/vLF9H06pFFM",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/youtsu-cat-stretch/",
+      "requiresMemberCode": false,
+      "sourceFile": "src/data/selfcare/youtsu-cat-stretch.md"
+    },
+    {
+      "id": "pelvic-tilt",
+      "slug": "pelvic-tilt",
+      "title": "骨盤前後運動",
+      "category": [
+        {
+          "slug": "youtsu",
+          "name": "腰痛"
+        },
+        {
+          "slug": "sorigoshi",
+          "name": "反り腰"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "kotsuban",
+          "name": "骨盤"
+        },
+        {
+          "slug": "koshi",
+          "name": "腰"
+        }
+      ],
+      "purpose": "骨盤を前後にゆっくり倒す動きで、腰まわりの筋肉をゆるめ、骨盤と腰の動きを取り戻します。腰痛の予防・改善に役立ち、高齢の方でも安全に行えます。",
+      "instructions": [
+        "あお向けに寝て、両膝を立てます。足は腰幅に開きます。",
+        "息を吐きながら、おへそを引き込むようにして腰を床に押しつけます（骨盤を後ろに倒す）。",
+        "5秒キープしたら、力を抜きます。",
+        "続けて、腰と床のすき間を軽く広げるように骨盤を前に倒します。",
+        "この前後の動きをゆっくり10回繰り返します。"
+      ],
+      "precautions": [
+        "反動をつけず、呼吸を止めずにゆっくり動かしましょう。",
+        "動かす範囲は小さくてかまいません。痛みのない範囲で行ってください。",
+        "腰に痛みやしびれが出る場合は中止してください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 1,
+      "tags": [
+        "エクササイズ",
+        "骨盤",
+        "腰",
+        "高齢者向け"
+      ],
+      "order": 21,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/pelvic-tilt/start.jpg",
+          "path": "public/images/pelvic-tilt/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/pelvic-tilt/end.jpg",
+          "path": "public/images/pelvic-tilt/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/pelvic-tilt/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/pelvic-tilt/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/PLNyC55a_cA",
+      "videoMobileUrl": "https://youtube.com/shorts/dv8sok64xUw",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/pelvic-tilt/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/pelvic-tilt.md"
+    },
+    {
+      "id": "bridge",
+      "slug": "bridge",
+      "title": "ブリッジ（お尻上げ）",
+      "category": [
+        {
+          "slug": "youtsu",
+          "name": "腰痛"
+        },
+        {
+          "slug": "sorigoshi",
+          "name": "反り腰"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "oshiri",
+          "name": "お尻"
+        },
+        {
+          "slug": "kotsuban",
+          "name": "骨盤"
+        },
+        {
+          "slug": "taikan",
+          "name": "体幹"
+        }
+      ],
+      "purpose": "お尻（大殿筋）と体幹を働かせて、骨盤を支える力を高めます。腰への負担を減らし、腰痛の予防や姿勢の安定につながります。",
+      "instructions": [
+        "あお向けに寝て、両膝を立てます。足は腰幅に開き、両手は体の横に置きます。",
+        "息を吐きながら、お尻に力を入れてゆっくり持ち上げます。",
+        "肩から膝までが一直線になったところで5秒キープします。",
+        "息を吸いながら、背骨を上から順に下ろすイメージでゆっくり戻します。",
+        "10回繰り返します。"
+      ],
+      "precautions": [
+        "腰を反らせて上げるのではなく、お尻の力で持ち上げましょう。",
+        "上げすぎると腰に負担がかかります。一直線までで十分です。",
+        "腰や膝に痛みが出る場合は中止してください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 2,
+      "tags": [
+        "エクササイズ",
+        "お尻",
+        "体幹",
+        "腰痛予防"
+      ],
+      "order": 22,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/bridge/start.jpg",
+          "path": "public/images/bridge/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/bridge/end.jpg",
+          "path": "public/images/bridge/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/bridge/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/bridge/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/tbjyTgav6T0",
+      "videoMobileUrl": "https://youtube.com/shorts/J4Unn5uzhIk",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/bridge/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/bridge.md"
+    },
+    {
+      "id": "dead-bug",
+      "slug": "dead-bug",
+      "title": "デッドバグ",
+      "category": [
+        {
+          "slug": "youtsu",
+          "name": "腰痛"
+        },
+        {
+          "slug": "sorigoshi",
+          "name": "反り腰"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "taikan",
+          "name": "体幹"
+        },
+        {
+          "slug": "koshi",
+          "name": "腰"
+        }
+      ],
+      "purpose": "あお向けで手足を交互に動かしながら、腰を反らせずに体幹（インナーマッスル）を働かせる練習です。腰を安定させる力がつき、腰痛の予防につながります。",
+      "instructions": [
+        "あお向けに寝て、両手を天井へ伸ばし、両膝を股関節の真上で90度に曲げます。",
+        "おへそを引き込むようにして、腰と床のすき間をつぶすように床へ軽く押しつけます。",
+        "その状態をキープしたまま、息を吐きながら右手と左脚をゆっくり床すれすれまで伸ばします。",
+        "ゆっくり元に戻し、反対側（左手と右脚）も同じように行います。",
+        "左右交互に10回ずつ繰り返します。"
+      ],
+      "precautions": [
+        "腰が床から浮くと効果がなく、腰を痛める原因になります。浮いてしまう場合は、手足を伸ばす範囲を小さくしてください。",
+        "呼吸を止めずに行いましょう。",
+        "首や肩に力が入る場合は、頭を床につけたまま行ってください。",
+        "腰に痛みが出る場合は中止してください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 2,
+      "tags": [
+        "エクササイズ",
+        "体幹",
+        "インナーマッスル",
+        "腰痛予防"
+      ],
+      "order": 23,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/dead-bug/start.jpg",
+          "path": "public/images/dead-bug/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/dead-bug/end.jpg",
+          "path": "public/images/dead-bug/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/dead-bug/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/dead-bug/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/aANPn_ZPyTg",
+      "videoMobileUrl": "https://youtube.com/shorts/jLE6rLy32-4",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/dead-bug/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/dead-bug.md"
+    },
+    {
+      "id": "nekoze-chest-open",
+      "slug": "nekoze-chest-open",
+      "title": "猫背改善 胸ひらきエクササイズ",
+      "category": [
+        {
+          "slug": "nekoze",
+          "name": "猫背"
+        },
+        {
+          "slug": "straightneck",
+          "name": "ストレートネック"
+        },
+        {
+          "slug": "katakori",
+          "name": "肩こり"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "senaka",
+          "name": "背中"
+        },
+        {
+          "slug": "kata",
+          "name": "肩"
+        },
+        {
+          "slug": "kubi",
+          "name": "首"
+        }
+      ],
+      "purpose": "縮こまった胸の筋肉を伸ばし、背中の筋肉を働かせることで、猫背やストレートネックの姿勢を整えます。",
+      "instructions": [
+        "立った状態、または座った状態で背筋を伸ばします。",
+        "両手を背中の後ろで組みます。",
+        "肩甲骨を寄せながら、組んだ手を下方向へ引き下げます。",
+        "胸を開いて15秒キープします。",
+        "ゆっくり戻し、3回繰り返します。"
+      ],
+      "precautions": [
+        "肩に痛みがある場合は無理に行わないでください。",
+        "反動をつけず、ゆっくり動かしましょう。"
+      ],
+      "duration": "約2分",
+      "difficulty": 1,
+      "tags": [
+        "姿勢",
+        "エクササイズ",
+        "肩甲骨"
+      ],
+      "order": 30,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/nekoze-chest-open/start.jpg",
+          "path": "public/images/nekoze-chest-open/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/nekoze-chest-open/end.jpg",
+          "path": "public/images/nekoze-chest-open/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/nekoze-chest-open/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/nekoze-chest-open/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/ddoiNzcibC0",
+      "videoMobileUrl": "https://youtube.com/shorts/35YfDa0rEe8",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/nekoze-chest-open/",
+      "requiresMemberCode": false,
+      "sourceFile": "src/data/selfcare/nekoze-chest-open.md"
+    },
+    {
+      "id": "kubi-chin-tuck",
+      "slug": "kubi-chin-tuck",
+      "title": "顎引きエクササイズ",
+      "category": [
+        {
+          "slug": "straightneck",
+          "name": "ストレートネック"
+        },
+        {
+          "slug": "kubikori",
+          "name": "首こり"
+        },
+        {
+          "slug": "nekoze",
+          "name": "猫背"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "kubi",
+          "name": "首"
+        }
+      ],
+      "purpose": "前に出た頭の位置をリセットし、首の深層にある筋肉（頸長筋）を働かせて、ストレートネックによる首への負担を減らします。",
+      "instructions": [
+        "背筋を伸ばしてイスに座るか、壁に背中をつけて立ちます。",
+        "目線は正面のまま、あごを水平に後ろへスライドさせるように引きます。",
+        "軽い二重あごを作るイメージで5秒キープします。",
+        "力を抜いてゆっくり戻します。",
+        "10回繰り返します。"
+      ],
+      "precautions": [
+        "上や下を向かず、あごを「水平に引く」ことを意識しましょう。",
+        "首や腕に痛み・しびれが出る場合は中止してください。"
+      ],
+      "duration": "約2分",
+      "difficulty": 1,
+      "tags": [
+        "エクササイズ",
+        "首",
+        "姿勢"
+      ],
+      "order": 31,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kubi-chin-tuck/start.jpg",
+          "path": "public/images/kubi-chin-tuck/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kubi-chin-tuck/end.jpg",
+          "path": "public/images/kubi-chin-tuck/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/kubi-chin-tuck/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/kubi-chin-tuck/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/9tKVDKnqP0Y",
+      "videoMobileUrl": "https://youtube.com/shorts/CMx23dr0zzY",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/kubi-chin-tuck/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/kubi-chin-tuck.md"
+    },
+    {
+      "id": "kubi-front-stretch",
+      "slug": "kubi-front-stretch",
+      "title": "首前面ストレッチ",
+      "category": [
+        {
+          "slug": "kubikori",
+          "name": "首こり"
+        },
+        {
+          "slug": "straightneck",
+          "name": "ストレートネック"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "kubi",
+          "name": "首"
+        }
+      ],
+      "purpose": "スマホやデスクワークの姿勢で縮こまりやすい首の前側の筋肉を伸ばし、頭が前に出た姿勢の改善を助けます。",
+      "instructions": [
+        "背筋を伸ばしてイスに座ります。",
+        "両手を重ねて鎖骨の下に当て、皮膚を軽く下へ押さえます。",
+        "息を吐きながら、ゆっくり天井を見上げるように上を向きます。",
+        "首の前側が伸びているのを感じながら20秒キープします。",
+        "ゆっくり戻し、2〜3回繰り返します。"
+      ],
+      "precautions": [
+        "反動をつけず、ゆっくり行いましょう。",
+        "首の後ろに痛みや詰まり感が出る場合は角度を浅くするか中止してください。",
+        "めまいが出る場合は行わないでください。"
+      ],
+      "duration": "約2分",
+      "difficulty": 1,
+      "tags": [
+        "ストレッチ",
+        "首",
+        "スマホ首"
+      ],
+      "order": 32,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kubi-front-stretch/start.jpg",
+          "path": "public/images/kubi-front-stretch/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kubi-front-stretch/end.jpg",
+          "path": "public/images/kubi-front-stretch/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/kubi-front-stretch/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/kubi-front-stretch/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/9WOyC6aU-Ns",
+      "videoMobileUrl": "https://youtube.com/shorts/0TfyJNst2vU",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/kubi-front-stretch/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/kubi-front-stretch.md"
+    },
+    {
+      "id": "kubi-scm-stretch",
+      "slug": "kubi-scm-stretch",
+      "title": "胸鎖乳突筋ストレッチ",
+      "category": [
+        {
+          "slug": "kubikori",
+          "name": "首こり"
+        },
+        {
+          "slug": "straightneck",
+          "name": "ストレートネック"
+        },
+        {
+          "slug": "zutsu",
+          "name": "頭痛"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "kubi",
+          "name": "首"
+        }
+      ],
+      "purpose": "耳の後ろから鎖骨につながる胸鎖乳突筋の緊張をゆるめ、首こりや首こりからくる頭痛の不快感をやわらげます。",
+      "instructions": [
+        "背筋を伸ばしてイスに座ります。",
+        "右手で左の鎖骨の下を軽く押さえます。",
+        "息を吐きながら、顔を右斜め上へゆっくり向けます。",
+        "首の左前側が伸びているのを感じながら20秒キープします。",
+        "反対側も同じように行います。左右2回ずつ繰り返します。"
+      ],
+      "precautions": [
+        "強く伸ばしすぎず、心地よい範囲で行ってください。",
+        "しびれやめまいが出る場合は中止してください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 1,
+      "tags": [
+        "ストレッチ",
+        "首",
+        "頭痛"
+      ],
+      "order": 33,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kubi-scm-stretch/start.jpg",
+          "path": "public/images/kubi-scm-stretch/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kubi-scm-stretch/end.jpg",
+          "path": "public/images/kubi-scm-stretch/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/kubi-scm-stretch/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/kubi-scm-stretch/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/qjwALav6CMc",
+      "videoMobileUrl": "https://youtube.com/shorts/GCNTn-LqkA4",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/kubi-scm-stretch/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/kubi-scm-stretch.md"
+    },
+    {
+      "id": "zutsu-neck-release",
+      "slug": "zutsu-neck-release",
+      "title": "後頭下筋群リリース",
+      "category": [
+        {
+          "slug": "zutsu",
+          "name": "頭痛"
+        },
+        {
+          "slug": "kubikori",
+          "name": "首こり"
+        },
+        {
+          "slug": "straightneck",
+          "name": "ストレートネック"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "kubi",
+          "name": "首"
+        }
+      ],
+      "purpose": "首の付け根にある後頭下筋群の緊張をゆるめ、首こり・ストレートネックや緊張型頭痛からくる不快感を軽減します。",
+      "instructions": [
+        "イスに座り、両手の指先を後頭部の生え際に当てます。",
+        "指で小さく円を描くようにやさしくマッサージします。",
+        "気持ちよい圧で30秒ほど続けます。",
+        "最後にあごを軽く引いてうなずく動きを5回行います。"
+      ],
+      "precautions": [
+        "強く押しすぎないようにしましょう。",
+        "突然の激しい頭痛がある場合はすぐに医療機関を受診してください。"
+      ],
+      "duration": "約2分",
+      "difficulty": 1,
+      "tags": [
+        "マッサージ",
+        "首",
+        "頭痛"
+      ],
+      "order": 34,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/zutsu-neck-release/step1.jpg",
+          "path": "public/images/zutsu-neck-release/step1.jpg",
+          "label": "①",
+          "kind": "step",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/zutsu-neck-release/step2.jpg",
+          "path": "public/images/zutsu-neck-release/step2.jpg",
+          "label": "②",
+          "kind": "step",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/zutsu-neck-release/step1.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/zutsu-neck-release/step2.jpg"
+      ],
+      "videoUrl": "https://youtu.be/qlOUZSQX-i8",
+      "videoMobileUrl": "https://youtube.com/shorts/IIGhrBfRx6M",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/zutsu-neck-release/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/zutsu-neck-release.md"
+    },
+    {
+      "id": "kubi-thoracic-extension",
+      "slug": "kubi-thoracic-extension",
+      "title": "胸椎伸展エクササイズ",
+      "category": [
+        {
+          "slug": "straightneck",
+          "name": "ストレートネック"
+        },
+        {
+          "slug": "nekoze",
+          "name": "猫背"
+        },
+        {
+          "slug": "kubikori",
+          "name": "首こり"
+        },
+        {
+          "slug": "katakori",
+          "name": "肩こり"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "senaka",
+          "name": "背中"
+        },
+        {
+          "slug": "kubi",
+          "name": "首"
+        }
+      ],
+      "purpose": "丸まりやすい背中の上部（胸椎）を伸ばして動きを取り戻し、首が前に出る姿勢の根本原因にアプローチします。ストレートネック・猫背の改善に効果的です。",
+      "instructions": [
+        "ベッドに半分寝転がるような形で寝て、肩甲骨の下あたりをベッドの角に当てます。イスの場合は、背もたれのあるイスに座り、肩甲骨の下あたりを背もたれの上端に当てます。",
+        "両手を頭の後ろで軽く組みます。",
+        "息を吐きながら、背もたれ（またはベッドに背中が当たっている部分）を支点に、胸を開くようにゆっくり反らせます。",
+        "5秒キープしてゆっくり戻します。",
+        "10回繰り返します。"
+      ],
+      "precautions": [
+        "腰を反らせるのではなく、背中の上部を伸ばす意識で行いましょう。",
+        "痛みが出る場合は反らす角度を小さくするか中止してください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 2,
+      "tags": [
+        "エクササイズ",
+        "姿勢",
+        "背中"
+      ],
+      "order": 35,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kubi-thoracic-extension/start.jpg",
+          "path": "public/images/kubi-thoracic-extension/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kubi-thoracic-extension/end.jpg",
+          "path": "public/images/kubi-thoracic-extension/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/kubi-thoracic-extension/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/kubi-thoracic-extension/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/wy7zdc37WUs",
+      "videoMobileUrl": "https://youtube.com/shorts/GFxvTcTYExg",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/kubi-thoracic-extension/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/kubi-thoracic-extension.md"
+    },
+    {
+      "id": "kubi-towel-stretch",
+      "slug": "kubi-towel-stretch",
+      "title": "首のタオルストレッチ",
+      "category": [
+        {
+          "slug": "kubikori",
+          "name": "首こり"
+        },
+        {
+          "slug": "straightneck",
+          "name": "ストレートネック"
+        },
+        {
+          "slug": "katakori",
+          "name": "肩こり"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "kubi",
+          "name": "首"
+        }
+      ],
+      "purpose": "タオルで頭を支えながら首を後ろへ倒し、首の前から後ろを心地よく伸ばします。ストレートネックの改善・首の緊張緩和に効果的です。",
+      "instructions": [
+        "タオルの両端を持ち、後頭部に軽くかけます。",
+        "タオルを斜め上に引っ張り、頭を支えます。",
+        "無理のない範囲で、ゆっくりと頭を後ろに倒します。",
+        "首の前から後ろが心地よく伸びるのを感じながら、20〜30秒キープします。",
+        "ゆっくり戻します。1日1〜2セットを目安に続けましょう。"
+      ],
+      "precautions": [
+        "タオルを横に引っ張りすぎないようにしましょう。顎が下がると首の前側が伸びず、効果が半減します。",
+        "呼吸を止めず、リラックスして行いましょう。",
+        "痛みが出ない範囲で、心地よい伸びを感じるくらいにとどめてください。",
+        "首や腕にしびれ・めまいが出る場合は中止してください。"
+      ],
+      "duration": "約2分",
+      "difficulty": 1,
+      "tags": [
+        "ストレッチ",
+        "タオル",
+        "首",
+        "デスクワーク"
+      ],
+      "order": 36,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kubi-towel-stretch/start.jpg",
+          "path": "public/images/kubi-towel-stretch/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/kubi-towel-stretch/end.jpg",
+          "path": "public/images/kubi-towel-stretch/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/kubi-towel-stretch/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/kubi-towel-stretch/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/_Cfzcl-lELY",
+      "videoMobileUrl": "https://youtube.com/shorts/L2_jibjGGnA",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/kubi-towel-stretch/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/kubi-towel-stretch.md"
+    },
+    {
+      "id": "piriformis-stretch",
+      "slug": "piriformis-stretch",
+      "title": "お尻（梨状筋）ストレッチ",
+      "category": [
+        {
+          "slug": "zakotsushinkeitsu",
+          "name": "坐骨神経痛"
+        },
+        {
+          "slug": "kokansetsutsu",
+          "name": "股関節痛"
+        },
+        {
+          "slug": "youtsu",
+          "name": "腰痛"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "oshiri",
+          "name": "お尻"
+        },
+        {
+          "slug": "kokansetsu",
+          "name": "股関節"
+        },
+        {
+          "slug": "kotsuban",
+          "name": "骨盤"
+        },
+        {
+          "slug": "koshi",
+          "name": "腰"
+        }
+      ],
+      "purpose": "お尻の深い場所にある梨状筋をゆるめ、股関節まわりの柔軟性を高めます。梨状筋が硬くなると坐骨神経を圧迫することがあるため、坐骨神経痛やお尻の痛み、股関節の硬さ、腰への負担の軽減に役立ちます。",
+      "instructions": [
+        "あお向けに寝て、両膝を立てます。",
+        "右の足首を左の膝の上にのせ、数字の「4」の形をつくります。",
+        "左のももの裏を両手で抱え、ゆっくり胸のほうへ引き寄せます。",
+        "右のお尻が伸びているのを感じながら20〜30秒キープします。",
+        "反対側も同じように行います。左右2回ずつ繰り返します。"
+      ],
+      "precautions": [
+        "強く引きすぎず、心地よい範囲で行ってください。",
+        "股関節に強い痛みがある場合は中止してください。",
+        "お尻や脚にしびれが強く出る場合は中止し、医師や施術者にご相談ください。",
+        "首や肩に力が入らないよう、頭は床につけたまま行いましょう。",
+        "呼吸を止めずに、リラックスして行いましょう。"
+      ],
+      "duration": "約3分",
+      "difficulty": 1,
+      "tags": [
+        "ストレッチ",
+        "お尻",
+        "坐骨神経痛",
+        "梨状筋",
+        "股関節"
+      ],
+      "order": 40,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/piriformis-stretch/start.jpg",
+          "path": "public/images/piriformis-stretch/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/piriformis-stretch/end.jpg",
+          "path": "public/images/piriformis-stretch/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/piriformis-stretch/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/piriformis-stretch/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/PBc0fJl7Ato",
+      "videoMobileUrl": "https://youtube.com/shorts/4bJyXwrpKsk",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/piriformis-stretch/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/piriformis-stretch.md"
+    },
+    {
+      "id": "hip-flexor-stretch",
+      "slug": "hip-flexor-stretch",
+      "title": "腸腰筋ストレッチ",
+      "category": [
+        {
+          "slug": "sorigoshi",
+          "name": "反り腰"
+        },
+        {
+          "slug": "youtsu",
+          "name": "腰痛"
+        },
+        {
+          "slug": "kokansetsutsu",
+          "name": "股関節痛"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "kokansetsu",
+          "name": "股関節"
+        },
+        {
+          "slug": "koshi",
+          "name": "腰"
+        }
+      ],
+      "purpose": "長時間の座り姿勢で縮こまりやすい股関節前面の筋肉（腸腰筋）を伸ばします。骨盤の傾きが整い、反り腰や腰痛の改善につながります。",
+      "instructions": [
+        "床に片膝立ちになります（右膝を床につけ、左足を前に出す）。",
+        "おへそを引き込むようにして、骨盤を軽く後ろに倒します。",
+        "その姿勢のまま、体重をゆっくり前へ移動します。",
+        "右の股関節の前が伸びているのを感じながら20〜30秒キープします。",
+        "反対側も同じように行います。左右2回ずつ繰り返します。"
+      ],
+      "precautions": [
+        "腰を反らせて前に出すと効果が半減し、腰を痛める原因になります。骨盤を後ろに倒したまま行いましょう。",
+        "床につく膝が痛い場合は、タオルやクッションを敷いてください。",
+        "痛みが出る場合は範囲を小さくするか中止してください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 2,
+      "tags": [
+        "ストレッチ",
+        "股関節",
+        "反り腰",
+        "デスクワーク"
+      ],
+      "order": 41,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/hip-flexor-stretch/start.jpg",
+          "path": "public/images/hip-flexor-stretch/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/hip-flexor-stretch/end.jpg",
+          "path": "public/images/hip-flexor-stretch/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/hip-flexor-stretch/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/hip-flexor-stretch/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/FHdfu9ervfM",
+      "videoMobileUrl": "https://youtube.com/shorts/121FehIKubg",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/hip-flexor-stretch/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/hip-flexor-stretch.md"
+    },
+    {
+      "id": "adductor-stretch",
+      "slug": "adductor-stretch",
+      "title": "内転筋ストレッチ",
+      "category": [
+        {
+          "slug": "kokansetsutsu",
+          "name": "股関節痛"
+        },
+        {
+          "slug": "youtsu",
+          "name": "腰痛"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "kokansetsu",
+          "name": "股関節"
+        },
+        {
+          "slug": "futomomo",
+          "name": "太もも"
+        }
+      ],
+      "purpose": "内ももの筋肉（内転筋）を伸ばし、股関節の動きをなめらかにします。立ったまま台に足をのせて行うので、床に座るのがつらい方でも無理なく行えます。股関節の硬さや開脚のしづらさ、腰への負担の軽減に役立ちます。",
+      "instructions": [
+        "ベッドやイスなど、安定した台の横に立ちます。",
+        "台側の足を横に上げ、足の外側からふくらはぎを台の上にのせます。",
+        "両手を腰に当て、背筋を伸ばして正面を向きます。",
+        "息を吐きながら、背中を丸めずに上体をゆっくり前へ倒します。",
+        "内ももが伸びているのを感じながら20〜30秒キープします。",
+        "反対側も同じように行います。左右2〜3回ずつ繰り返します。"
+      ],
+      "precautions": [
+        "台は動かないものを使い、キャスター付きのイスは避けてください。",
+        "台が高いほど強く伸びます。はじめは低めの台から始め、無理のない高さで行いましょう。",
+        "背中を丸めると内ももが伸びにくくなります。骨盤を立てたまま上体を倒すのがポイントです。",
+        "床に立っている側の足は、つま先を正面に向けたまま行いましょう。",
+        "股関節や膝の内側に痛みが出る場合は中止してください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 2,
+      "tags": [
+        "ストレッチ",
+        "内もも",
+        "股関節",
+        "開脚",
+        "立ったまま"
+      ],
+      "order": 42,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/adductor-stretch/start.jpg",
+          "path": "public/images/adductor-stretch/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/adductor-stretch/end.jpg",
+          "path": "public/images/adductor-stretch/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/adductor-stretch/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/adductor-stretch/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/76iSHikD-CI",
+      "videoMobileUrl": "https://youtube.com/shorts/Py15CjDmJbI",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/adductor-stretch/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/adductor-stretch.md"
+    },
+    {
+      "id": "clamshell",
+      "slug": "clamshell",
+      "title": "クラムシェル",
+      "category": [
+        {
+          "slug": "kokansetsutsu",
+          "name": "股関節痛"
+        },
+        {
+          "slug": "hizatsu",
+          "name": "膝痛"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "oshiri",
+          "name": "お尻"
+        },
+        {
+          "slug": "kokansetsu",
+          "name": "股関節"
+        }
+      ],
+      "purpose": "お尻の横にある中殿筋をピンポイントで鍛えます。骨盤と股関節が安定し、歩行時のふらつきや膝への負担の軽減につながります。",
+      "instructions": [
+        "横向きに寝て、両膝を90度に曲げます。頭は下の腕にのせます。",
+        "かかとどうしを合わせたまま、上の膝をゆっくり開きます。",
+        "貝が開くように、お尻の横に力が入るのを感じながら開きます。",
+        "ゆっくり閉じます。15回繰り返します。",
+        "反対側も同じように行います。"
+      ],
+      "precautions": [
+        "骨盤が後ろに倒れないよう、体は真横に向けたまま行いましょう。",
+        "膝を大きく開くことより、お尻の横に力が入っているかを意識してください。",
+        "腰や股関節に痛みが出る場合は中止してください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 2,
+      "tags": [
+        "エクササイズ",
+        "中殿筋",
+        "股関節",
+        "膝痛予防"
+      ],
+      "order": 44,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/clamshell/start.jpg",
+          "path": "public/images/clamshell/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/clamshell/end.jpg",
+          "path": "public/images/clamshell/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/clamshell/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/clamshell/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/h0-DPt-qsCw",
+      "videoMobileUrl": "https://youtube.com/shorts/POtQc2pZS7Q",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/clamshell/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/clamshell.md"
+    },
+    {
+      "id": "side-leg-raise",
+      "slug": "side-leg-raise",
+      "title": "サイドレッグレイズ",
+      "category": [
+        {
+          "slug": "kokansetsutsu",
+          "name": "股関節痛"
+        },
+        {
+          "slug": "youtsu",
+          "name": "腰痛"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "oshiri",
+          "name": "お尻"
+        },
+        {
+          "slug": "kotsuban",
+          "name": "骨盤"
+        }
+      ],
+      "purpose": "脚を真横に持ち上げて中殿筋を鍛えます。骨盤が安定して歩行や立ち姿勢が安定し、腰やお尻のだるさの予防にも役立ちます。",
+      "instructions": [
+        "横向きに寝て、下の脚は軽く曲げ、上の脚はまっすぐ伸ばします。",
+        "体が前後に傾かないよう、真横を向いた姿勢をつくります。",
+        "上の脚をゆっくり真上へ持ち上げます（30〜40度が目安）。",
+        "ゆっくり下ろします。15回繰り返します。",
+        "反対側も同じように行います。"
+      ],
+      "precautions": [
+        "脚が前に出ると太ももの前ばかりを使ってしまいます。真横に上げましょう。",
+        "反動を使わず、上げるときも下ろすときもゆっくり動かします。",
+        "腰に痛みが出る場合は、上げる高さを低くするか中止してください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 2,
+      "tags": [
+        "エクササイズ",
+        "中殿筋",
+        "骨盤",
+        "歩行改善"
+      ],
+      "order": 45,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/side-leg-raise/start.jpg",
+          "path": "public/images/side-leg-raise/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/side-leg-raise/end.jpg",
+          "path": "public/images/side-leg-raise/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/side-leg-raise/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/side-leg-raise/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/IXqVe0pcl7Q",
+      "videoMobileUrl": "https://youtube.com/shorts/3Bbgi7Kc_ZQ",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/side-leg-raise/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/side-leg-raise.md"
+    },
+    {
+      "id": "seated-piriformis-stretch",
+      "slug": "seated-piriformis-stretch",
+      "title": "座位・殿筋（梨状筋）ストレッチ",
+      "category": [
+        {
+          "slug": "youtsu",
+          "name": "腰痛"
+        },
+        {
+          "slug": "kokansetsutsu",
+          "name": "股関節痛"
+        },
+        {
+          "slug": "zakotsushinkeitsu",
+          "name": "坐骨神経痛"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "oshiri",
+          "name": "お尻"
+        },
+        {
+          "slug": "kokansetsu",
+          "name": "股関節"
+        }
+      ],
+      "purpose": "お尻全体（大殿筋・中殿筋）を広く伸ばします。長時間の座り姿勢で硬くなったお尻をゆるめ、腰や股関節の動きを軽くします。",
+      "instructions": [
+        "イスに浅く座り、右足首を左の膝の上にのせます。",
+        "背筋を伸ばし、骨盤を立てます。",
+        "息を吐きながら、背中を丸めずに上体をゆっくり前へ倒します。",
+        "右のお尻全体が伸びているのを感じながら20〜30秒キープします。",
+        "反対側も同じように行います。左右2回ずつ繰り返します。"
+      ],
+      "precautions": [
+        "背中を丸めると効果が半減します。骨盤を立てたまま倒しましょう。",
+        "股関節の前や膝の内側に痛みが出る場合は、のせる位置を調整するか中止してください。",
+        "イスは安定したものを使い、キャスター付きのイスは避けてください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 1,
+      "tags": [
+        "ストレッチ",
+        "お尻",
+        "梨状筋",
+        "デスクワーク",
+        "イスで簡単"
+      ],
+      "order": 46,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/seated-piriformis-stretch/start.jpg",
+          "path": "public/images/seated-piriformis-stretch/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/seated-piriformis-stretch/end.jpg",
+          "path": "public/images/seated-piriformis-stretch/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/seated-piriformis-stretch/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/seated-piriformis-stretch/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/Zpr3gJNPaT4",
+      "videoMobileUrl": "https://youtube.com/shorts/DCqY1t0ALv0",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/seated-piriformis-stretch/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/seated-piriformis-stretch.md"
+    },
+    {
+      "id": "gojukata-pendulum",
+      "slug": "gojukata-pendulum",
+      "title": "四十肩・五十肩 振り子運動",
+      "category": [
+        {
+          "slug": "shijukata",
+          "name": "四十肩"
+        },
+        {
+          "slug": "gojukata",
+          "name": "五十肩"
+        },
+        {
+          "slug": "katakori",
+          "name": "肩こり"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "kata",
+          "name": "肩"
+        },
+        {
+          "slug": "hiji",
+          "name": "肘"
+        }
+      ],
+      "purpose": "肩関節に負担をかけずに腕を動かすことで、固まった肩の可動域を少しずつ取り戻します。",
+      "instructions": [
+        "テーブルなどに片手をつき、軽く前かがみになります。",
+        "痛むほうの腕を脱力して下に垂らします。",
+        "腕の力を抜いたまま、前後に小さく10回ゆらします。",
+        "次に左右に10回、最後に円を描くように10回ゆらします。"
+      ],
+      "precautions": [
+        "痛みの出ない範囲で小さく動かしましょう。",
+        "腕の力で振らず、身体の揺れを利用してください。",
+        "炎症が強い急性期は無理に行わないでください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 1,
+      "tags": [
+        "肩",
+        "可動域",
+        "リハビリ"
+      ],
+      "order": 50,
+      "images": [],
+      "imageUrls": [],
+      "videoUrl": null,
+      "videoMobileUrl": null,
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/gojukata-pendulum/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/gojukata-pendulum.md"
+    },
+    {
+      "id": "hiza-quad-set",
+      "slug": "hiza-quad-set",
+      "title": "膝痛予防 太もも強化（クアドセッティング）",
+      "category": [
+        {
+          "slug": "hizatsu",
+          "name": "膝痛"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "hiza",
+          "name": "膝"
+        },
+        {
+          "slug": "ashikubi",
+          "name": "足首"
+        }
+      ],
+      "purpose": "ひざを支える太もも前面の筋肉（大腿四頭筋）を鍛え、ひざへの負担を減らして膝痛を予防します。",
+      "instructions": [
+        "床に足を伸ばして座ります。",
+        "片方のひざの裏に丸めたタオルを置きます。",
+        "タオルを床に押しつけるように、太ももに力を入れます。",
+        "5秒キープして力を抜きます。",
+        "左右10回ずつ繰り返します。"
+      ],
+      "precautions": [
+        "ひざに強い痛みがある場合は中止してください。",
+        "呼吸を止めないように行いましょう。"
+      ],
+      "duration": "約4分",
+      "difficulty": 2,
+      "tags": [
+        "筋トレ",
+        "膝",
+        "太もも"
+      ],
+      "order": 60,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/hiza-quad-set/start.jpg",
+          "path": "public/images/hiza-quad-set/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/hiza-quad-set/end.jpg",
+          "path": "public/images/hiza-quad-set/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/hiza-quad-set/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/hiza-quad-set/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/9q0bMHD7hJI",
+      "videoMobileUrl": "https://youtube.com/shorts/0ITSe97DCj4",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/hiza-quad-set/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/hiza-quad-set.md"
+    },
+    {
+      "id": "hamstring-stretch",
+      "slug": "hamstring-stretch",
+      "title": "ハムストリングスストレッチ",
+      "category": [
+        {
+          "slug": "youtsu",
+          "name": "腰痛"
+        },
+        {
+          "slug": "zakotsushinkeitsu",
+          "name": "坐骨神経痛"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "futomomo",
+          "name": "太もも"
+        },
+        {
+          "slug": "koshi",
+          "name": "腰"
+        }
+      ],
+      "purpose": "太ももの裏（ハムストリングス）を伸ばします。ここが硬いと骨盤が後ろに引っぱられて腰に負担がかかるため、腰痛の改善や前屈のしやすさにつながります。",
+      "instructions": [
+        "床に座り、右脚を前に伸ばします。左脚は膝を曲げて楽な位置に置きます。",
+        "背筋を伸ばし、骨盤を立てて座ります。",
+        "息を吐きながら、股関節から折りたたむように上体を前へ倒します。",
+        "太ももの裏が伸びているのを感じながら20〜30秒キープします。",
+        "反対側も同じように行います。左右2回ずつ繰り返します。"
+      ],
+      "precautions": [
+        "背中を丸めて頭を近づけるのではなく、股関節から曲げるのがポイントです。",
+        "膝は軽く曲がっていてかまいません。無理に伸ばさないでください。",
+        "お尻や脚の裏にしびれが出る場合は中止してください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 1,
+      "tags": [
+        "ストレッチ",
+        "太もも裏",
+        "腰痛",
+        "デスクワーク"
+      ],
+      "order": 62,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/hamstring-stretch/start.jpg",
+          "path": "public/images/hamstring-stretch/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/hamstring-stretch/end.jpg",
+          "path": "public/images/hamstring-stretch/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/hamstring-stretch/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/hamstring-stretch/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/QT8grI6paK0",
+      "videoMobileUrl": "https://youtube.com/shorts/tf5mHEyNGtY",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/hamstring-stretch/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/hamstring-stretch.md"
+    },
+    {
+      "id": "quad-stretch",
+      "slug": "quad-stretch",
+      "title": "大腿四頭筋ストレッチ",
+      "category": [
+        {
+          "slug": "hizatsu",
+          "name": "膝痛"
+        },
+        {
+          "slug": "sorigoshi",
+          "name": "反り腰"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "futomomo",
+          "name": "太もも"
+        },
+        {
+          "slug": "hiza",
+          "name": "膝"
+        }
+      ],
+      "purpose": "太ももの前（大腿四頭筋）を伸ばします。太ももの前が張ると膝のお皿まわりが引っぱられるため、膝の痛みや太ももの張り、反り腰の軽減に役立ちます。",
+      "instructions": [
+        "壁やイスに片手をついて立ちます。",
+        "右手で右足の甲を持ち、かかとをお尻に近づけます。",
+        "両膝の位置をそろえ、おへそを引き込むようにして骨盤を軽く後ろに倒します。",
+        "太ももの前が伸びているのを感じながら20〜30秒キープします。",
+        "反対側も同じように行います。左右2回ずつ繰り返します。"
+      ],
+      "precautions": [
+        "腰を反らせると効果が半減し、腰を痛める原因になります。骨盤を後ろに倒したまま行いましょう。",
+        "膝を強く曲げすぎないでください。膝の前が痛む場合はすぐに中止してください。",
+        "ふらつく場合は、必ず壁やイスを支えにして行ってください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 2,
+      "tags": [
+        "ストレッチ",
+        "太もも前",
+        "膝",
+        "ランニング"
+      ],
+      "order": 63,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/quad-stretch/start.jpg",
+          "path": "public/images/quad-stretch/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/quad-stretch/end.jpg",
+          "path": "public/images/quad-stretch/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/quad-stretch/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/quad-stretch/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/eXmjShflrl4",
+      "videoMobileUrl": "https://youtube.com/shorts/hlqmsrDXYNk",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/quad-stretch/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/quad-stretch.md"
+    },
+    {
+      "id": "calf-stretch",
+      "slug": "calf-stretch",
+      "title": "ふくらはぎストレッチ",
+      "category": [
+        {
+          "slug": "mukumi",
+          "name": "むくみ・脚のだるさ"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "fukurahagi",
+          "name": "ふくらはぎ"
+        },
+        {
+          "slug": "ashikubi",
+          "name": "足首"
+        }
+      ],
+      "purpose": "ふくらはぎ（腓腹筋・ヒラメ筋）を伸ばします。ふくらはぎは血液を心臓に送り返すポンプの役割があるため、脚のむくみやだるさ、足がつるのを防ぐのに役立ちます。",
+      "instructions": [
+        "壁の前に立ち、両手を壁につきます。",
+        "右足を大きく後ろに引き、つま先はまっすぐ前に向けます。",
+        "右のかかとを床につけたまま、前の膝をゆっくり曲げて体重を前へ移動します。",
+        "ふくらはぎが伸びているのを感じながら20〜30秒キープします。",
+        "反対側も同じように行います。左右2回ずつ繰り返します。"
+      ],
+      "precautions": [
+        "後ろ足のかかとが浮くと伸びません。床につけたまま行いましょう。",
+        "反動をつけず、じわじわ伸ばしてください。",
+        "ふくらはぎに強い痛みや腫れがある場合は行わず、医療機関にご相談ください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 1,
+      "tags": [
+        "ストレッチ",
+        "ふくらはぎ",
+        "むくみ",
+        "こむら返り"
+      ],
+      "order": 64,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/calf-stretch/start.jpg",
+          "path": "public/images/calf-stretch/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/calf-stretch/end.jpg",
+          "path": "public/images/calf-stretch/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/calf-stretch/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/calf-stretch/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/kxSGPi6O_kA",
+      "videoMobileUrl": "https://youtube.com/shorts/vjCB3LsXMM8",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/calf-stretch/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/calf-stretch.md"
+    },
+    {
+      "id": "ankle-dorsiflexion",
+      "slug": "ankle-dorsiflexion",
+      "title": "足首背屈ストレッチ",
+      "category": [
+        {
+          "slug": "hizatsu",
+          "name": "膝痛"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "ashikubi",
+          "name": "足首"
+        },
+        {
+          "slug": "fukurahagi",
+          "name": "ふくらはぎ"
+        }
+      ],
+      "purpose": "足首を深く曲げる動き（背屈）の硬さを改善します。足首が硬いとしゃがむ動作や歩行、階段の上り下りがしづらくなるため、動きやすさの改善に役立ちます。",
+      "instructions": [
+        "床に片膝立ちになり、右足を前に出します。",
+        "右足のかかとを床につけたまま、右膝を足のつま先より前へゆっくり出します。",
+        "足首の前側が詰まる手前まで曲げ、5秒キープします。",
+        "ゆっくり戻します。10回繰り返します。",
+        "反対側も同じように行います。"
+      ],
+      "precautions": [
+        "かかとが浮かないように注意してください。浮くと足首が曲がっていません。",
+        "膝はつま先と同じ方向へ。内側に入らないようにしましょう。",
+        "足首の前に強い痛みが出る場合は中止してください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 2,
+      "tags": [
+        "モビリティ",
+        "足首",
+        "歩行改善",
+        "スクワット"
+      ],
+      "order": 65,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/ankle-dorsiflexion/start.jpg",
+          "path": "public/images/ankle-dorsiflexion/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/ankle-dorsiflexion/end.jpg",
+          "path": "public/images/ankle-dorsiflexion/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/ankle-dorsiflexion/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/ankle-dorsiflexion/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/BbMkqD22kVc",
+      "videoMobileUrl": "https://youtube.com/shorts/9phfgPv6V6c",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/ankle-dorsiflexion/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/ankle-dorsiflexion.md"
+    },
+    {
+      "id": "plantar-fascia-stretch",
+      "slug": "plantar-fascia-stretch",
+      "title": "足底筋膜ストレッチ",
+      "category": [
+        {
+          "slug": "sokuteikinmakuen",
+          "name": "足底筋膜炎"
+        }
+      ],
+      "bodyPart": [
+        {
+          "slug": "ashiura",
+          "name": "足裏"
+        },
+        {
+          "slug": "ashikubi",
+          "name": "足首"
+        }
+      ],
+      "purpose": "足の裏に張る足底筋膜をゆるめます。足底筋膜炎による「朝の一歩目が痛い」「かかとが痛む」といった症状の軽減に役立ちます。",
+      "instructions": [
+        "イスに座り、右足を左の膝の上にのせます。",
+        "右手で足の指をまとめて持ち、足の甲側へゆっくり反らせます。",
+        "足の裏が突っ張るのを感じながら20〜30秒キープします。",
+        "反らせたまま、もう片方の手の親指で足裏を、かかとから指のつけ根に向かってやさしくほぐします。",
+        "反対側も同じように行います。朝起きてすぐ行うのがおすすめです。"
+      ],
+      "precautions": [
+        "強く押しすぎず、心地よい圧で行ってください。",
+        "痛みが強い時期は、無理にほぐさずストレッチだけにとどめましょう。",
+        "痛みが長く続く場合は、自己判断せず医療機関や当院にご相談ください。"
+      ],
+      "duration": "約3分",
+      "difficulty": 1,
+      "tags": [
+        "ストレッチ",
+        "足裏",
+        "足底筋膜炎",
+        "かかとの痛み"
+      ],
+      "order": 66,
+      "images": [
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/plantar-fascia-stretch/start.jpg",
+          "path": "public/images/plantar-fascia-stretch/start.jpg",
+          "label": "開始姿勢",
+          "kind": "ok",
+          "caption": null
+        },
+        {
+          "url": "https://yucha922-cyber.github.io/selfexercise/images/plantar-fascia-stretch/end.jpg",
+          "path": "public/images/plantar-fascia-stretch/end.jpg",
+          "label": "終了姿勢",
+          "kind": "ok",
+          "caption": null
+        }
+      ],
+      "imageUrls": [
+        "https://yucha922-cyber.github.io/selfexercise/images/plantar-fascia-stretch/start.jpg",
+        "https://yucha922-cyber.github.io/selfexercise/images/plantar-fascia-stretch/end.jpg"
+      ],
+      "videoUrl": "https://youtu.be/by_p7XlLEwo",
+      "videoMobileUrl": "https://youtube.com/shorts/eM7UHPPUsDI",
+      "detailUrl": "https://yucha922-cyber.github.io/selfexercise/selfcare/plantar-fascia-stretch/",
+      "requiresMemberCode": true,
+      "sourceFile": "src/data/selfcare/plantar-fascia-stretch.md"
+    }
+  ]
+}
