@@ -1,14 +1,9 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 import { useApp } from "../state";
 import { Button, Card, CardTitle, Notice } from "../components/ui";
 import { useSpeech } from "../lib/useSpeech";
-import { copyText } from "../lib/clipboard";
-import { DEFAULT_PROVIDER } from "../ai/provider";
-import { findPrivacyWarnings } from "../ai/prompt";
-import { applyAIOutput } from "../domain/applyAI";
-import { findExercise, type Exercise } from "../data/selfcare";
 import { SelectedSummary } from "../components/SelectedSummary";
-import { SAMPLE_AI_RESPONSE } from "../samples/sampleCase";
+import { AIPanel } from "../components/AIPanel";
 
 const MEMO_TEMPLATE = `主訴：
 副主訴：
@@ -24,25 +19,12 @@ HOPE：
 `;
 
 export function InputScreen() {
-  const { session, dispatch, notify, setTab, settings, setSettings, snapshot, saveSnapshot, restoreSnapshot, undoImport, setUndoPoint } =
-    useApp();
-  const [aiText, setAiText] = useState("");
-  const [errors, setErrors] = useState<string[]>([]);
-  const [warnings, setWarnings] = useState<string[]>([]);
-  const [imported, setImported] = useState(false);
+  const { session, dispatch, setTab, settings, setSettings, snapshot, saveSnapshot, restoreSnapshot } = useApp();
   const memoRef = useRef<HTMLTextAreaElement>(null);
 
   const onSpeech = useCallback((text: string) => dispatch({ type: "appendMemo", text }), [dispatch]);
   const speech = useSpeech(onSpeech);
 
-  const resolved = useMemo(
-    () =>
-      session.selections
-        .map((selection) => ({ selection, exercise: findExercise(selection.slug) }))
-        .filter((x): x is { selection: (typeof session.selections)[number]; exercise: Exercise } => !!x.exercise),
-    [session],
-  );
-  const privacy = findPrivacyWarnings(session.memo, session.meta.patientName);
 
   const enableSpeech = (on: boolean) => {
     if (on) {
@@ -55,41 +37,6 @@ export function InputScreen() {
       speech.stop();
     }
     setSettings({ ...settings, speechEnabled: on });
-  };
-
-  const copyPrompt = async () => {
-    if (session.memo.trim() === "") {
-      notify("施術メモを入力してください");
-      memoRef.current?.focus();
-      return;
-    }
-    const prompt = DEFAULT_PROVIDER.buildRequest({
-      meta: { visitDate: session.meta.visitDate },
-      memo: session.memo,
-      selections: resolved,
-      pendingExercises: session.pendingExercises,
-    });
-    const ok = await copyText(prompt);
-    notify(ok ? "プロンプトをコピーしました。ChatGPT / Claude に貼り付けてください" : "コピーできませんでした");
-  };
-
-  const importAI = () => {
-    setImported(false);
-    const result = DEFAULT_PROVIDER.parseResponse(
-      aiText,
-      session.selections.map((s) => s.slug),
-    );
-    if (!result.ok) {
-      setErrors(result.errors);
-      setWarnings([]);
-      return;
-    }
-    setErrors([]);
-    setWarnings(result.warnings);
-    setUndoPoint();
-    dispatch({ type: "replace", session: applyAIOutput(session, result.value) });
-    setImported(true);
-    notify("AIの生成結果を取り込みました");
   };
 
   return (
@@ -205,91 +152,7 @@ export function InputScreen() {
           </Button>
         </Card>
 
-        <Card>
-          <CardTitle step="4" title="AIでカルテ・資料を作成" hint="ChatGPT または Claude（無料プランでも可）にコピー＆貼り付けします。自動送信はしません。" />
-          {privacy.length > 0 && (
-            <div className="mb-3">
-              <Notice tone="warn" title="個人情報が含まれている可能性があります">
-                <ul className="list-disc pl-5">
-                  {privacy.map((w) => (
-                    <li key={w}>{w}</li>
-                  ))}
-                </ul>
-              </Notice>
-            </div>
-          )}
-          <Button variant="gold" size="lg" className="w-full" onClick={copyPrompt}>
-            ① プロンプトと入力内容をコピー
-          </Button>
-          <p className="mt-2 text-xs text-slate-500">
-            お名前・担当者名はプロンプトに含まれません。メモに氏名・連絡先などを書いていないか確認してから貼り付けてください。
-          </p>
-
-          <label className="mt-5 block text-sm font-semibold" htmlFor="ai-result">
-            ② AIの返答をここに貼り付け
-          </label>
-          <textarea
-            id="ai-result"
-            className="field mt-1 min-h-40 font-mono text-xs"
-            value={aiText}
-            onChange={(e) => setAiText(e.target.value)}
-            placeholder="AIの返答（JSON）を丸ごと貼り付けてください"
-          />
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button variant="primary" size="lg" className="flex-1" onClick={importAI} disabled={aiText.trim() === ""}>
-              ③ 取り込む
-            </Button>
-            {undoImport && (
-              <Button variant="ghost" onClick={undoImport}>
-                取り込み前に戻す
-              </Button>
-            )}
-          </div>
-          {errors.length > 0 && (
-            <div className="mt-3">
-              <Notice tone="error" title="取り込めませんでした（貼り付けた内容はそのまま残っています）">
-                <ul className="list-disc space-y-1 whitespace-pre-wrap pl-5">
-                  {errors.map((e) => (
-                    <li key={e}>{e}</li>
-                  ))}
-                </ul>
-              </Notice>
-            </div>
-          )}
-          {imported && (
-            <div className="mt-3 space-y-2">
-              <Notice tone="ok" title="取り込みました">
-                内容を確認・修正してから使用してください。
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <Button size="sm" onClick={() => setTab("karte")}>カルテを確認</Button>
-                  <Button size="sm" onClick={() => setTab("document")}>患者資料を確認</Button>
-                </div>
-              </Notice>
-              {warnings.length > 0 && (
-                <Notice tone="warn">
-                  <ul className="list-disc pl-5">
-                    {warnings.map((w) => (
-                      <li key={w}>{w}</li>
-                    ))}
-                  </ul>
-                </Notice>
-              )}
-            </div>
-          )}
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-navy-100 pt-3 text-sm">
-            <button type="button" className="font-semibold text-navy-700 underline-offset-4 hover:underline" onClick={() => setTab("karte")}>
-              AIを使わず手動で作成する →
-            </button>
-            <button
-              type="button"
-              className="text-xs text-slate-400 hover:text-navy-700"
-              onClick={() => setAiText(SAMPLE_AI_RESPONSE)}
-              title="架空サンプルのAI返答を貼り付けます（動作確認用）"
-            >
-              返答例（架空）を貼る
-            </button>
-          </div>
-        </Card>
+        <AIPanel onEmptyMemo={() => memoRef.current?.focus()} />
       </div>
     </div>
   );

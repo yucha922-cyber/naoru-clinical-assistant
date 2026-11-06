@@ -50,7 +50,7 @@ function schemaExample(slugs: string[]): string {
   return JSON.stringify(example, null, 2);
 }
 
-export function buildPrompt(input: PromptInput): string {
+export function buildPrompt(input: PromptInput, { includeExample = true }: { includeExample?: boolean } = {}): string {
   const fieldList = KARTE_FIELDS.map((f) => `- ${f.key}: 【${f.label}】`).join("\n");
 
   const selfcare =
@@ -81,9 +81,11 @@ ${fieldList}
 # 施術者が選択したセルフケア
 ${selfcare}
 ${pending}
-# 出力形式（この JSON の形で、値だけを書き換えて出力）
-${schemaExample(input.selections.map((s) => s.exercise.slug))}
-
+${
+    includeExample
+      ? `# 出力形式（この JSON の形で、値だけを書き換えて出力）\n${schemaExample(input.selections.map((s) => s.exercise.slug))}\n`
+      : `# 出力形式\n指定された JSON スキーマに従って出力する。karte の各項目・patient.currentState・patient.idealState は日本語の文章、pointsToMind は1項目1文の配列、patient.selfcare は選択済みセルフケアごとに1件。\n`
+  }
 # 施術日
 ${input.meta.visitDate || "（未入力）"}
 
