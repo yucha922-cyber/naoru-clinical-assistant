@@ -3,6 +3,9 @@
 NAORU整体のセラピストが使う **カルテ作成・患者説明資料・セルフケア連携アプリ** です。
 施術メモを1回入力するだけで、SalonOne に貼り付けるカルテと、患者さんに渡す A4 の説明資料（PDF）を作れます。
 
+**▶ アプリを開く: https://yucha922-cyber.github.io/naoru-clinical-assistant/**
+（ブラウザで開くだけで使えます。インストール不要）
+
 > ⚠️ **初期版（MVP）です。** 開発・動作確認はすべて架空のデータで行っています。
 > 実際の患者情報での運用は、下記「セキュリティ上の制約」を確認し、院として安全性を確認してから行ってください。
 
@@ -56,6 +59,22 @@ git clone https://github.com/yucha922-cyber/naoru-clinical-assistant.git
 cd naoru-clinical-assistant
 npm install
 ```
+
+## 公開サイト（GitHub Pages）
+
+https://yucha922-cyber.github.io/naoru-clinical-assistant/
+
+- `main` にマージされると GitHub Actions（`.github/workflows/ci-deploy.yml`）が型チェック・Lint・テスト・ビルドを行い、自動で公開します（数分で反映）。
+- Pull Request でも同じチェックが走ります（`gh pr checks` で確認）。
+- 公開されるのは **アプリのプログラムだけ** です。入力内容は開いたブラウザのメモリ上にしか存在せず、サイトや GitHub に送信・保存されません。
+- 検索エンジンに載らないよう `noindex` を設定しています（URLを知っている人は誰でも開けます）。
+
+### 初回だけ必要な GitHub の設定
+
+1. Settings → General → Danger Zone → **Change visibility → Public**（無料プランの Pages は Public リポジトリのみ）
+2. Settings → Pages → Build and deployment → Source: **GitHub Actions**
+3. Actions タブ → 「CI / Deploy to GitHub Pages」→ **Run workflow**（または次回 main にマージ）
+4. リポジトリトップ右上の About の ⚙ → Website に上記URLを入力（「Use your GitHub Pages website」にチェック）
 
 ## ローカルでの起動
 
@@ -190,15 +209,16 @@ HTML/CSS の固定テンプレート（`src/components/PatientDocument.tsx`）�
 - 外部への自動送信はありません（外部通信は selfexercise の公開画像の読み込みのみ）。解析ツールも入れていません。
 - 音声入力（Web Speech API）は、ブラウザによって音声が提供元のサーバーで処理されるため **既定で無効** です。有効化は注意事項を確認したうえで行ってください。
 - リポジトリには架空のサンプルデータだけを置きます。実患者の情報・APIキー・認証情報をコミットしないでください（`.gitignore` で `.env*` などを除外しています）。
-- 初期版はローカル（自分のPC）での利用を前提としています。
-- **将来、外部公開やスタッフでの共同利用を行う場合は、認証（ログイン）・権限管理・暗号化された安全な保存先・アクセスログ・個人情報保護方針への対応が必要です。** 現状の構成のまま公開しないでください。
+- アプリは GitHub Pages で公開していますが、サーバー側の処理はなく、データは各自のブラウザ内だけで扱われます。ログイン機能はありません。
+- リポジトリは Public です。**ソースコード・Issue・PR に実患者の情報や認証情報を絶対に書かないでください。**
+- **将来、患者データの保存やスタッフでの共同利用を行う場合は、認証（ログイン）・権限管理・暗号化された安全な保存先・アクセスログ・個人情報保護方針への対応が必要です。** 現状の構成のままデータ保存機能を追加しないでください。
 
 ## 無料運用の条件
 
 - 使用しているライブラリはすべてオープンソース（MIT 等）で無料です。
-- サーバー・データベース・有料クラウドは使いません（ローカルで `npm run dev` / `npm run preview` して利用）。
+- サーバー・データベース・有料クラウドは使いません（公開は GitHub Pages の無料枠）。
 - AI は ChatGPT / Claude の Web 版にコピー＆貼り付け（各サービスの無料プランまたは既存の契約の範囲内）。有料 API は使いません。
-- GitHub の Private リポジトリは無料プランで利用できます。
+- GitHub Pages・GitHub Actions は Public リポジトリなら無料です（Private のまま Pages を使うには有料プランが必要なため Public にしています）。
 
 ## 今後の開発予定
 
