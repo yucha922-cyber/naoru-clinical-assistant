@@ -34,8 +34,8 @@ export const resolveModelId = (key: LocalModelKey, shaderF16: boolean): LocalMod
  */
 export const LOCAL_CONTEXT_WINDOW = 6144;
 /** 各ステップの出力の上限（トークン） */
-export const LOCAL_MAX_TOKENS_PATIENT = 1200;
-export const LOCAL_MAX_TOKENS_KARTE = 2400;
+export const LOCAL_MAX_TOKENS_PATIENT = 1600;
+export const LOCAL_MAX_TOKENS_KARTE = 2600;
 /** 残り時間の目安に使う、出力のおおよその文字数（架空サンプルでの実測: 患者資料 約540・カルテ 約1,040 文字） */
 export const LOCAL_EXPECTED_CHARS = { patient: 650, karte: 1200 } as const;
 /** これを超える長さの指示文は端末内AIでは扱えない可能性が高い（日本語はおおむね1文字≒1トークン） */

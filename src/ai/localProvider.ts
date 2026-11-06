@@ -6,6 +6,7 @@ import type { ClinicalAIProvider, GenerateOptions } from "./provider";
 import { LOCAL_CONTEXT_WINDOW, LOCAL_MAX_TOKENS_KARTE, LOCAL_MAX_TOKENS_PATIENT, LOCAL_MODELS, type LocalModelId } from "./localModels";
 import { buildLocalKartePrompt, buildLocalPatientPrompt } from "./localPrompts";
 import { AI_SCHEMA_VERSION } from "./schema";
+import { parseStepOutput, type LocalStep } from "./localParse";
 
 // 端末内AI（WebLLM / WebGPU）。
 // - モデルはオープンソース（Qwen3）で無料。初回にモデルファイルをダウンロードし、ブラウザ内（Cache Storage）に保存する。
@@ -116,7 +117,7 @@ async function generateStep(
   maxTokens: number,
   opts: GenerateOptions,
   step: LocalStep,
-): Promise<string> {
+): Promise<{ text: string; truncated: boolean }> {
   await eng.resetChat();
   const stream = await eng.chat.completions.create({
     messages: [
@@ -130,25 +131,17 @@ async function generateStep(
     extra_body: { enable_thinking: false },
   });
   let text = "";
+  let truncated = false;
   for await (const chunk of stream) {
     text += chunk.choices[0]?.delta?.content ?? "";
+    if (chunk.choices[0]?.finish_reason === "length") truncated = true;
     opts.onToken?.(text.length, step);
   }
   if (opts.signal?.aborted) throw new DOMException("中止しました", "AbortError");
-  return text;
+  return { text, truncated };
 }
 
-export type LocalStep = "patient" | "karte";
-
-/** JSON テキストを安全に読む（失敗したら null） */
-const tryParse = (t: string): Record<string, unknown> | null => {
-  try {
-    const v = JSON.parse(t);
-    return v && typeof v === "object" ? (v as Record<string, unknown>) : null;
-  } catch {
-    return null;
-  }
-};
+export type { LocalStep };
 
 export function createLocalProvider(modelId: LocalModelId): ClinicalAIProvider {
   const model = LOCAL_MODELS.find((m) => m.f16Id === modelId || m.f32Id === modelId)!;
@@ -171,19 +164,17 @@ export function createLocalProvider(modelId: LocalModelId): ClinicalAIProvider {
       try {
         // ステップ1: 患者資料
         const p = await generateStep(eng, buildLocalPatientPrompt(input), buildPatientJsonSchema(slugs), LOCAL_MAX_TOKENS_PATIENT, opts, "patient");
-        const pj = tryParse(p) ?? {};
-        const patientOnly = JSON.stringify({ schemaVersion: AI_SCHEMA_VERSION, karte: {}, ...pj });
-        opts.onPartial?.("patient", patientOnly);
-        // ステップ2: カルテ
+        const pr = parseStepOutput(p.text, "patient", { truncated: p.truncated });
+        opts.onPartial?.("patient", pr.ok ? pr.text : pr.raw, pr.ok ? undefined : pr.reason);
+        // ステップ2: カルテ（患者資料が失敗してもカルテは作る）
         const k = await generateStep(eng, buildLocalKartePrompt(input), buildKarteJsonSchema(), LOCAL_MAX_TOKENS_KARTE, opts, "karte");
-        const kj = tryParse(k) ?? {};
-        const karteOnly = JSON.stringify({
+        const kr = parseStepOutput(k.text, "karte", { truncated: k.truncated });
+        opts.onPartial?.("karte", kr.ok ? kr.text : kr.raw, kr.ok ? undefined : kr.reason);
+        return JSON.stringify({
           schemaVersion: AI_SCHEMA_VERSION,
-          patient: { currentPoints: [], idealPoints: [], pointsToMind: [] },
-          ...kj,
+          ...(pr.ok ? pr.data : {}),
+          ...(kr.ok ? kr.data : {}),
         });
-        opts.onPartial?.("karte", karteOnly);
-        return JSON.stringify({ schemaVersion: AI_SCHEMA_VERSION, ...pj, ...kj });
       } finally {
         opts.signal?.removeEventListener("abort", onAbort);
       }
