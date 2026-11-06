@@ -1,4 +1,6 @@
 import { emptyKarte, type Karte, type KarteKey } from "./karte";
+import type { AIOutput } from "../ai/schema";
+import { applyAIOutput } from "./applyAI";
 
 // 1回の施術（セッション）分の入力データ。
 // ★ この状態はブラウザのメモリ上にだけ存在し、localStorage 等には保存しません。
@@ -69,7 +71,9 @@ export type SessionAction =
   | { type: "removePending"; name: string }
   | { type: "setKarteField"; key: KarteKey; value: string }
   | { type: "setPatientDoc"; patch: Partial<PatientDoc> }
-  | { type: "setConfirmations"; items: string[] };
+  | { type: "setConfirmations"; items: string[] }
+  /** AIの出力を「その時点の最新の状態」に反映する（生成中に編集された内容を失わないため） */
+  | { type: "applyAI"; output: AIOutput };
 
 export function sessionReducer(state: Session, action: SessionAction): Session {
   switch (action.type) {
@@ -120,6 +124,8 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
       return { ...state, patientDoc: { ...state.patientDoc, ...action.patch } };
     case "setConfirmations":
       return { ...state, confirmations: action.items };
+    case "applyAI":
+      return applyAIOutput(state, action.output);
   }
 }
 

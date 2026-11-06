@@ -80,6 +80,7 @@ async function routeImages(context, { breakUrl } = {}) {
       }
       return route.continue();
     }
+    if (/huggingface\.co|raw\.githubusercontent\.com/.test(url)) return route.abort(); // AIモデルのダウンロード先（E2Eでは遮断）
     external.push(url);
     return route.abort();
   });
@@ -87,7 +88,8 @@ async function routeImages(context, { breakUrl } = {}) {
 }
 
 await waitServer();
-const browser = await chromium.launch();
+// ソフトウェア版 WebGPU を有効にして、端末内AIの画面・エラー処理も確認する
+const browser = await chromium.launch({ args: ["--enable-unsafe-webgpu", "--use-webgpu-adapter=swiftshader"] });
 
 try {
   // ---------- メインの通しテスト（PC幅） ----------
@@ -107,6 +109,21 @@ try {
   await page.evaluate(() => document.fonts.ready);
   const fontOk = await page.evaluate(() => document.fonts.check('16px "Noto Sans JP Variable"', "日本語あア"));
   check("日本語フォント（Noto Sans JP）が読み込まれる", fontOk);
+
+  // 端末内AI（既定のタブ）: この端末で使えるかの判定結果が表示される
+  const localPanel = page.getByTestId("local-ai");
+  await localPanel.getByText(/この端末・ブラウザでは使えません|AIモデル/).first().waitFor({ timeout: 20000 });
+  const gpuSupported = await localPanel.getByText("AIモデル", { exact: true }).isVisible();
+  check("端末内AIの利用可否を判定して表示する", true, gpuSupported ? "WebGPU 利用可" : "WebGPU 非対応のため案内を表示");
+  if (gpuSupported) {
+    // モデルのダウンロード先は E2E では遮断しているため、失敗時のエラー表示まで確認する
+    await page.getByRole("button", { name: "サンプル（架空）" }).click();
+    await localPanel.getByRole("button", { name: "AIでカルテ・資料を作成" }).click();
+    const err = await localPanel.getByRole("alert").first().waitFor({ timeout: 60000 }).then(() => localPanel.getByRole("alert").first().innerText()).catch(() => "");
+    check("端末内AI: モデルを取得できない場合にエラーを表示し、入力は残る", err.length > 0 && (await page.getByLabel("施術メモ").inputValue()).includes("架空のサンプル"), err.slice(0, 80));
+    await page.getByRole("button", { name: "すべて消去" }).click();
+  }
+  await page.getByRole("tab", { name: "ChatGPT／Claudeにコピー" }).click();
 
   // 空のままプロンプトコピー → 案内
   await page.getByRole("button", { name: "① プロンプトと入力内容をコピー" }).click();
