@@ -1,0 +1,34 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+coverage/
+
+# selfexercise の読み取り用キャッシュ（scripts/sync-selfcare.mjs が作成）
+.cache/
+
+# テスト成果物（スクリーンショット・PDF）
+test-results/
+artifacts/
+
+# 環境変数・認証情報（絶対にコミットしない）
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# 患者データの書き出しファイル（万一リポジトリ内に保存しても除外）
+*.naoru.json
+patient-data/
+exports/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.log
+npm-debug.log*

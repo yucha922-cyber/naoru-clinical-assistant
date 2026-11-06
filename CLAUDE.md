@@ -1,0 +1,92 @@
+# CLAUDE.md — NAORU Clinical Assistant 開発ルール
+
+このファイルは、今後 Claude Code（および人間の開発者）がこのリポジトリで作業するときに
+必ず守るルールです。README.md と矛盾する場合はこのファイルを優先してください。
+
+## 1. プロジェクトの前提
+
+- NAORU整体のセラピスト向け「カルテ作成・患者説明資料・セルフケア連携」アプリ。
+- Vite + React + TypeScript + Tailwind CSS の **完全クライアントサイド** アプリ。サーバーは持たない。
+- 既存のセルフケアライブラリ（`yucha922-cyber/selfexercise`）とは **完全に独立** したリポジトリ。
+  - selfexercise のファイル・ページ・画像・URL を変更しない。こちらからは **読み取り専用**。
+  - セルフケアデータは `npm run sync:selfcare` で読み取り、`src/data/selfcare.json` を生成する。
+
+## 2. 患者情報の保護（最優先）
+
+- 実患者の情報を **リポジトリに保存しない・コミットしない**。サンプルは必ず架空データ。
+- 患者データを `console.log` 等でログに出さない。
+- `localStorage` / `sessionStorage` / IndexedDB / Cookie に患者情報を保存しない（初期版はメモリ上のみ）。
+- 外部AIや外部サービスへ患者情報を **自動送信しない**。AI連携はコピー＆貼り付けのみ。
+- 外部解析ツール（Google Analytics 等）・エラートラッキングを無断で導入しない。
+- 音声入力（Web Speech API）は外部サーバーで処理される可能性があるため、**デフォルト無効** を維持する。
+- APIキー・トークン・パスワードをソースコードに書かない。`.env*` はコミットしない。
+
+## 3. 費用
+
+- 追加費用0円が条件。有料API（OpenAI / Anthropic の従量課金API等）、有料DB、有料クラウド、
+  決済情報の登録が必要なサービスを **ユーザーの明示的な許可なく導入しない**。
+- AI処理は `src/ai/` の `ClinicalAIProvider` インターフェース経由にする。将来APIやローカルAIを
+  追加するときは新しい Provider を実装し、既存のコピー＆貼り付け方式を壊さない。
+
+## 4. 臨床文書のルール（プロンプト・UI文言を変更するとき）
+
+- 実施していない検査・施術を創作しない。不明な情報を推測で補完しない。
+- 患者の申告（主観）・測定事実（客観）・臨床仮説を区別する。
+- 即時効果と長期的改善を区別する。症状の原因や施術効果を断定しない。
+- 患者資料に載せるセルフケアは **施術者が選択したものだけ**。AIの提案で追加しない。
+  ライブラリに無い・特定できない運動は「確認待ち」として表示し、資料には載せない。
+
+## 5. GitHub ブランチ運用ルール（必ず守る）
+
+- `main` を唯一の正式な開発完了ブランチとする。
+- 新機能や修正は原則として作業ブランチで開発する。ブランチ名は
+  `feature/…`、`fix/…`、`refactor/…`、`docs/…`、`chore/…` などで整理する。
+- 作業が完了したら必ず `main` をベースとした Pull Request を作成する。
+  ```bash
+  gh pr create --base main
+  ```
+- テストとビルドが成功したことを確認してから `main` にマージする（下記「マージ前チェック」）。
+  ```bash
+  gh pr checks
+  ```
+- マージ方法は原則 **Squash Merge**。
+  ```bash
+  gh pr merge --squash --delete-branch
+  ```
+- **mainへのマージ完了後は、作業ブランチをローカルとリモートの両方から削除する。**
+  （`--delete-branch` で削除されなかった場合は `git push origin --delete <branch>` と
+  `git branch -D <branch>` を実行する）
+- マージ後はローカルの `main` を最新の `origin/main` に同期する。
+  ```bash
+  git checkout main && git fetch origin && git reset --hard origin/main   # 未コミット変更が無いことを確認してから
+  git fetch --prune
+  ```
+- 未マージの変更を含むブランチは削除しない。
+- `main` および default branch は **絶対に削除しない**。
+- 競合やテスト失敗がある場合は無理にマージしない。
+- ブランチ削除に失敗したら、その状態をユーザーに報告する。
+- 開発終了時は `main` が最新であることを確認する。
+- GitHub のリポジトリ設定「Automatically delete head branches」を有効にしておく。
+  ```bash
+  gh repo edit yucha922-cyber/naoru-clinical-assistant --delete-branch-on-merge
+  ```
+
+### マージ前チェック（すべて成功していること）
+
+```bash
+npm ci
+npm run typecheck
+npm run lint
+npm test
+npm run build
+npm run e2e        # Playwright が使える環境のみ。使えない場合はその旨を報告する
+```
+
+## 6. 実装上の約束
+
+- セルフケアデータに存在しないフィールドを推測で埋めない（無い値は `null`）。
+- 存在しない運動IDは警告表示し、資料には出さない。
+- AI出力の取り込みは `src/ai/schema.ts` の zod スキーマで検証し、失敗時も貼り付けた元テキストを保持する。
+- 患者資料は HTML/CSS の固定テンプレート（A4縦）で作り、ブラウザ印刷で PDF 化する。
+- UI文言は日本語。施術者が毎日使うので、操作数を増やさない。
+- 確認していない項目を「確認済み」と報告しない。
