@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useApp } from "../state";
 import { findExercise } from "../data/selfcare";
 import { PatientDocument, type ResolvedSelection } from "../components/PatientDocument";
+import { FitToWidth } from "../components/FitToWidth";
 import { MIND_ICON_COMPONENTS } from "../doc/mindIcons";
 import { PostureFigure } from "../doc/PostureFigure";
 import { BODY_AREAS, MIND_ICONS, POSTURES, guessMindIcon, type MindIcon } from "../doc/postures";
@@ -207,8 +208,11 @@ export function DocumentScreen() {
         </Card>
       </div>
 
-      <div className="print-shell overflow-x-auto rounded-2xl bg-slate-200/70 p-4 sm:p-6">
-        <PatientDocument session={session} items={items} guides={guides} showSteps={showSteps} />
+      <div className="print-shell rounded-2xl bg-slate-200/70 p-3 sm:p-5">
+        <p className="no-print mb-2 text-center text-xs text-slate-500">資料の全体プレビュー（画面に合わせて縮小表示。印刷・PDFは実寸のA4です）</p>
+        <FitToWidth>
+          <PatientDocument session={session} items={items} guides={guides} showSteps={showSteps} />
+        </FitToWidth>
       </div>
     </div>
   );

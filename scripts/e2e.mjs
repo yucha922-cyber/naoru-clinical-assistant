@@ -301,7 +301,9 @@ try {
   await ctx2.close();
 
   // ---------- 画面幅への対応 ----------
+  const previewScales = [];
   for (const vp of [
+    { name: "pc-1600-2col", width: 1600, height: 1000 },
     { name: "pc-1440", width: 1440, height: 900 },
     { name: "ipad-landscape-1180", width: 1180, height: 820 },
     { name: "ipad-portrait-820", width: 820, height: 1180 },
@@ -333,6 +335,18 @@ try {
         ok = false;
         bad.push(`${t}: アクティブなタブ表示が「${current}」`);
       }
+      if (t === "患者説明資料") {
+        const fit = await p.evaluate(() => {
+          const sheet = document.querySelector('[data-testid="a4-sheet"]').getBoundingClientRect();
+          const box = document.querySelector(".fit-to-width").getBoundingClientRect();
+          return { ok: sheet.left >= box.left - 1 && sheet.right <= box.right + 1 && sheet.right <= window.innerWidth, scale: document.querySelector(".fit-to-width").dataset.previewScale };
+        });
+        if (!fit.ok) {
+          ok = false;
+          bad.push(`資料プレビューが表示エリアからはみ出している（縮小率 ${fit.scale}）`);
+        }
+        previewScales.push(`${vp.width}px→${fit.scale}`);
+      }
       if (r.over > 1) {
         ok = false;
         bad.push(`${t}: ${r.els.join(", ")}`);
@@ -342,6 +356,7 @@ try {
     check(`画面幅 ${vp.width}px で横にはみ出さない（全4画面）`, ok, bad.join(" / "));
     await c.close();
   }
+  check("患者資料のプレビューが横スクロールなしで全体表示される（画面に合わせて縮小）", previewScales.length === 5, previewScales.join(" / "));
 } catch (e) {
   check("E2E 実行中に例外", false, e instanceof Error ? e.stack : String(e));
 } finally {

@@ -106,4 +106,12 @@ body {
   .a4-guides {
     background-image: none !important;
   }
+  /* 画面用の縮小表示を解除して実寸で印刷する */
+  .fit-to-width {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .fit-to-width-inner {
+    transform: none !important;
+  }
 }
