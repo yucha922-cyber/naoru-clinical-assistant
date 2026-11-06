@@ -18,7 +18,7 @@ export type GenerateOptions = {
   /** 生成中の進捗（これまでに生成した文字数。段階的に生成する Provider は段階名も渡す） */
   onToken?: (chars: number, step?: "patient" | "karte") => void;
   /** 段階的に生成する Provider が、各段階の結果（取り込める JSON テキスト）を渡す */
-  onPartial?: (part: "patient" | "karte", text: string) => void;
+  onPartial?: (part: "patient" | "karte", text: string, error?: string) => void;
 };
 
 export interface ClinicalAIProvider {

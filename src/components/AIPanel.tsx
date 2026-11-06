@@ -27,6 +27,7 @@ export function AIPanel({ onEmptyMemo }: { onEmptyMemo: () => void }) {
   const [mode, setMode] = useState<Mode>("local");
   const [aiText, setAiText] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
+  const [errorTitle, setErrorTitle] = useState("取り込めませんでした（AIの出力は貼り付け欄に残っています）");
   const [warnings, setWarnings] = useState<string[]>([]);
   const [imported, setImported] = useState(false);
 
@@ -104,6 +105,7 @@ export function AIPanel({ onEmptyMemo }: { onEmptyMemo: () => void }) {
       session.selections.map((s) => s.slug),
     );
     if (!result.ok) {
+      setErrorTitle("取り込めませんでした（AIの出力は貼り付け欄に残っています）");
       setErrors(result.errors);
       setWarnings([]);
       return false;
@@ -162,7 +164,11 @@ export function AIPanel({ onEmptyMemo }: { onEmptyMemo: () => void }) {
       let stepStart = 0;
       let rate = 0;
       let patientDone = false;
-      let failed = false;
+      const stepErrors: string[] = [];
+      const stepWarnings: string[] = [];
+      let failedRaw = "";
+      let applied = false;
+      const slugs = session.selections.map((s) => s.slug);
       const text = await provider.generate!(promptInput, {
         signal: controller.signal,
         onLoadProgress: (p) => setPhase({ kind: "loading", progress: p.progress, text: p.text }),
@@ -187,10 +193,24 @@ export function AIPanel({ onEmptyMemo }: { onEmptyMemo: () => void }) {
           });
         },
         // B: 患者資料ができた時点で先に反映し、カルテはそのあと反映する
-        onPartial: (part, partText) => {
-          const ok = importText(partText, { parts: [part], undo: part === "patient", quiet: true });
-          if (!ok) failed = true;
-          if (part === "patient" && ok) {
+        onPartial: (part, partText, err) => {
+          const label = part === "patient" ? "患者資料" : "カルテ";
+          if (err) {
+            stepErrors.push(err);
+            failedRaw = partText;
+            return;
+          }
+          const r = DEFAULT_PROVIDER.parseResponse(partText, slugs);
+          if (!r.ok) {
+            stepErrors.push(...r.errors.map((e) => `${label}: ${e}`));
+            failedRaw = partText;
+            return;
+          }
+          if (!applied) setUndoPoint();
+          applied = true;
+          stepWarnings.push(...r.warnings);
+          dispatch({ type: "applyAI", output: r.value, parts: [part] });
+          if (part === "patient") {
             patientDone = true;
             notify("患者資料ができました（④で確認できます）。続けてカルテを作成しています");
           }
@@ -198,12 +218,17 @@ export function AIPanel({ onEmptyMemo }: { onEmptyMemo: () => void }) {
       });
       setDownloaded((d) => ({ ...d, [modelKey]: true }));
       setWarm({ kind: "ready" });
-      setAiText(text);
       setPhase({ kind: "idle" });
-      if (failed) {
-        setMode("copy"); // 取り込めなかった出力を確認・修正できるよう、貼り付け欄を表示する
+      setWarnings(stepWarnings);
+      setImported(applied);
+      if (stepErrors.length) {
+        setAiText(failedRaw || text); // 失敗した出力は「ChatGPT／Claudeにコピー」タブの貼り付け欄で確認できる
+        setErrors(stepErrors);
+        setErrorTitle(applied ? "一部を作成できませんでした（作成できた部分は反映済みです）" : "作成できませんでした");
+        notify(applied ? "一部を作成できませんでした" : "作成できませんでした");
       } else {
-        setImported(true);
+        setAiText(text);
+        setErrors([]);
         notify("カルテと患者資料を作成しました");
       }
     } catch (e) {
@@ -398,7 +423,7 @@ export function AIPanel({ onEmptyMemo }: { onEmptyMemo: () => void }) {
       )}
       {errors.length > 0 && (
         <div className="mt-3">
-          <Notice tone="error" title="取り込めませんでした（AIの出力は貼り付け欄に残っています）">
+          <Notice tone="error" title={errorTitle}>
             <ul className="list-disc space-y-1 whitespace-pre-wrap pl-5">
               {errors.map((e) => (
                 <li key={e}>{e}</li>

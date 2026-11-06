@@ -369,6 +369,32 @@ try {
   check("B: タブを移動しても生成は続き、完了後にカルテが反映される", stillRunning && karteAfter === "架空の主訴（テスト）", `戻ったとき作成中表示=${stillRunning} / 主訴「${karteAfter}」`);
   await ctx3.close();
 
+  // 片方の段階（患者資料）が失敗したとき: カルテは反映され、失敗の理由が表示される
+  const ctx4 = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  await routeImages(ctx4);
+  const FAKE_FAIL = FAKE_LOCAL.replace(
+    'opts.onPartial("patient", JSON.stringify(patient));',
+    'opts.onPartial("patient", "<think>\\n\\n</think>\\n\\n{\\"patient\\": {\\"goal\\": \\"途中", "患者資料の生成結果を読み取れませんでした。もう一度お試しいただくか、「ChatGPT／Claudeにコピー」をお使いください。");',
+  );
+  await ctx4.route(/\/assets\/localProvider-[^/]+\.js$/, (route) => route.fulfill({ status: 200, contentType: "text/javascript", body: FAKE_FAIL }));
+  const p4 = await ctx4.newPage();
+  p4.on("dialog", (d) => d.accept());
+  await p4.goto(BASE);
+  await p4.getByRole("button", { name: "サンプル（架空）" }).click();
+  await p4.getByText("✓ AIの準備ができています").waitFor({ timeout: 10000 });
+  await p4.getByTestId("local-ai").getByRole("button", { name: "AIでカルテ・資料を作成" }).click();
+  const errBox = p4.locator("[data-screen=input]").getByRole("alert").filter({ hasText: "一部を作成できませんでした" });
+  await errBox.waitFor({ timeout: 20000 });
+  const errText = await errBox.innerText();
+  await p4.getByRole("button", { name: /^3カルテ$|カルテ$/ }).last().click();
+  const karteF = await p4.locator('[data-karte-field="chiefComplaint"]').inputValue();
+  check(
+    "片方の段階が失敗しても、もう片方は反映し、失敗の理由を表示する",
+    errText.includes("患者資料の生成結果を読み取れませんでした") && karteF === "架空の主訴（テスト）",
+    errText.replace(/\n/g, " ").slice(0, 70),
+  );
+  await ctx4.close();
+
   // ---------- 画面幅への対応 ----------
   const previewScales = [];
   for (const vp of [
