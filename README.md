@@ -1,5 +1,212 @@
 # NAORU Clinical Assistant
 
-NAORU整体のセラピスト向け「カルテ作成・患者説明資料・セルフケア連携」アプリ（開発中）。
+NAORU整体のセラピストが使う **カルテ作成・患者説明資料・セルフケア連携アプリ** です。
+施術メモを1回入力するだけで、SalonOne に貼り付けるカルテと、患者さんに渡す A4 の説明資料（PDF）を作れます。
 
-開発ルールは [CLAUDE.md](./CLAUDE.md) を参照してください。
+> ⚠️ **初期版（MVP）です。** 開発・動作確認はすべて架空のデータで行っています。
+> 実際の患者情報での運用は、下記「セキュリティ上の制約」を確認し、院として安全性を確認してから行ってください。
+
+---
+
+## 目的
+
+- 問診・評価・施術内容の入力を1回にまとめ、カルテ記載と患者説明資料づくりの手間を減らす
+- 既存のセルフケアライブラリ（[selfexercise](https://github.com/yucha922-cyber/selfexercise)）の公式画像・説明・URLを資料に載せる
+- 追加費用0円で運用する（有料AI APIは使わず、ChatGPT / Claude へのコピー＆貼り付けで連携）
+
+## 基本の流れ
+
+```
+① カルテ入力   施術メモを入力（テキスト／任意で音声）
+② セルフケア選択 ライブラリから運動を選ぶ（回数・時間を編集）
+   ↓ 「プロンプトと入力内容をコピー」→ ChatGPT / Claude に貼り付け
+   ↓ AIの返答（JSON）を貼り付けて「取り込む」
+③ カルテ       内容を確認・修正 →「カルテをコピー」→ SalonOne に貼り付け
+④ 患者説明資料  内容を確認・修正 →「PDFを出力（印刷）」→ 患者さんにお渡し
+```
+
+AIを使わずに、③④ を手で入力することもできます。
+
+## 主な機能
+
+| 画面 | 機能 |
+|------|------|
+| ① カルテ入力 | 基本情報（施術日・担当・資料用のお名前）、施術メモ、見出しテンプレート挿入、音声入力（既定は無効）、一時保存（メモリ内）、統合プロンプトのコピー、AI出力の取り込み（スキーマ検証・エラー表示・取り込み前に戻す）、個人情報の混入警告 |
+| ② セルフケア選択 | 運動一覧、キーワード検索、症状別・部位別の絞り込み、複数選択、並べ替え、回数・時間と「ひとこと」の編集、注意事項の表示、詳細ページURLのコピー、QRコード表示、確認待ち（ライブラリに無い運動）の管理、存在しない運動IDの警告 |
+| ③ カルテ | NAORU整体フォーマット21項目の表示・編集、空欄項目を省略したコピー、選択中のセルフケアを【現状のセルフケア項目】へ反映、AIからの確認事項の表示 |
+| ④ 患者説明資料 | ①今のお身体の状態 ②理想のお身体の状態 ③意識していくこと ④今日のセルフケア（画像・手順・注意・QRコード）、A4縦プレビュー（改ページ目安線）、印刷前チェック（未入力・画像欠落・確認待ち・存在しないID）、ブラウザ印刷による PDF 保存 |
+
+## 技術構成
+
+- [Vite](https://vite.dev/) 8 + [React](https://react.dev/) 19 + TypeScript 6
+- [Tailwind CSS](https://tailwindcss.com/) 4
+- [zod](https://zod.dev/) 4（AI出力・セルフケアデータのスキーマ検証）
+- [qrcode](https://github.com/soldair/node-qrcode)（QRコードをブラウザ内で生成）
+- [Noto Sans JP](https://fonts.google.com/noto/specimen/Noto+Sans+JP)（@fontsource で同梱。PDFの文字化け防止）
+- テスト: [Vitest](https://vitest.dev/)（単体）、Playwright（E2E。開発環境にインストール済みのものを利用）
+
+**完全クライアントサイド** のアプリです。サーバー・データベースはありません。入力内容はブラウザのメモリ上にだけ存在します。
+
+## インストール
+
+Node.js 20.19 以上（推奨 22）が必要です。
+
+```bash
+git clone https://github.com/yucha922-cyber/naoru-clinical-assistant.git
+cd naoru-clinical-assistant
+npm install
+```
+
+## ローカルでの起動
+
+```bash
+npm run dev
+```
+
+ブラウザで http://127.0.0.1:5173/ を開きます（自分のPCからのみアクセスできる設定です）。
+ヘッダーの「サンプル（架空）」で架空のデータを読み込み、「返答例（架空）を貼る」→「③ 取り込む」で一連の動作を試せます。
+
+本番ビルドの確認:
+
+```bash
+npm run build
+npm run preview    # http://127.0.0.1:4173/
+```
+
+## テスト
+
+```bash
+npm run typecheck   # TypeScript 型チェック
+npm run lint        # ESLint
+npm test            # 単体テスト（Vitest）
+npm run build       # 本番ビルド
+npm run e2e         # ブラウザ通しテスト（要 build・Playwright）
+npm run check       # typecheck + lint + test + build をまとめて実行
+```
+
+`npm run e2e` は架空のサンプルで「入力 → プロンプトコピー → 不正JSON → 取り込み → カルテ編集・コピー → セルフケア検索・選択 → 資料 → A4 PDF出力 → 画像欠落検出 → 4種類の画面幅」を確認し、
+`artifacts/`（Git管理外）にスクリーンショットと PDF を保存します。
+selfexercise の画像を手元のクローンから配信してテストする場合:
+
+```bash
+E2E_IMAGES_DIR=../selfexercise/public/images npm run e2e
+```
+
+## GitHub 運用ルール
+
+詳細は [CLAUDE.md](./CLAUDE.md) を参照してください。要点:
+
+- `main` が唯一の正式ブランチ。作業は `feature/…` `fix/…` `refactor/…` などのブランチで行う
+- 作業完了後は `gh pr create --base main` で Pull Request を作成
+- テスト・ビルドの成功を確認してから `gh pr merge --squash --delete-branch`（Squash Merge）
+- **マージ後は作業ブランチをローカル・リモートの両方から削除** し、ローカルの `main` を `origin/main` に同期
+- 未マージのブランチ、`main`／default branch は削除しない。競合やテスト失敗時は無理にマージしない
+
+## セルフケアデータの連携方法
+
+既存の selfexercise リポジトリは **読み取りのみ** で、ファイル・ページ・画像・URL は一切変更しません。
+
+### 仕組み
+
+`scripts/sync-selfcare.mjs` が selfexercise の以下を読み取り、`src/data/selfcare.json` を生成します。
+
+| 読み取り元（selfexercise） | 用途 |
+|---|---|
+| `src/data/selfcare/*.md`（`_` で始まるファイルは除外） | 種目の原本（frontmatter ＋「## 目的／実施方法／注意点」） |
+| `src/data/categories.ts` | 症状（SYMPTOMS）・部位（PARTS）の名前 |
+| `src/config/clinic.ts` の `recommendedSlugs` | 会員コード不要で閲覧できる種目 |
+| `public/images/<slug>/` のファイル名 | 公式画像のURL（画像はコピーせず、公開サイトのURLを参照） |
+
+生成される各種目のフィールド:
+
+| フィールド | 内容（元データ） |
+|---|---|
+| `id` / `slug` | ファイル名（selfexercise に別の ID は無いため `id = slug`） |
+| `title` | frontmatter `title` |
+| `category` | frontmatter `symptoms`（症状 slug と名前） |
+| `bodyPart` | frontmatter `parts`（部位 slug と名前） |
+| `purpose` | 「## 目的」 |
+| `instructions` | 「## 実施方法」の各行 |
+| `precautions` | 「## 注意点」の各行 |
+| `duration` | frontmatter `duration`（**未記入なら null**。selfexercise の画面は「約3分」を既定表示しますが、推測では埋めません） |
+| `difficulty` / `tags` / `order` | frontmatter |
+| `images` / `imageUrls` | 画像フォルダ（開始姿勢／終了姿勢／ダメな例／step① ② ③ の順。selfexercise と同じ規則） |
+| `videoUrl` / `videoMobileUrl` | frontmatter `youtube` / `youtube_mobile`、または画像フォルダ内の動画 |
+| `detailUrl` | `https://yucha922-cyber.github.io/selfexercise/selfcare/<slug>/` |
+| `requiresMemberCode` | 詳細ページの閲覧に会員コードが必要か（`recommendedSlugs` 以外は true） |
+
+### 更新方法（新しい運動を追加したとき）
+
+1. selfexercise 側でいつもどおり `.md` と画像を追加し、GitHub Pages に公開する
+2. このリポジトリで以下を実行（`.cache/selfexercise` に軽量クローンして取り込みます）
+
+   ```bash
+   npm run sync:selfcare
+   ```
+
+   手元に selfexercise のクローンがある場合: `npm run sync:selfcare -- --source ../selfexercise`
+3. `src/data/selfcare.json` の差分を確認し、作業ブランチでコミット → PR → マージ
+
+最新かどうかの確認だけ行う場合: `npm run sync:selfcare -- --check`
+
+### 注意
+
+- 画像は公開サイト（GitHub Pages）から読み込むため、資料の表示・印刷にはインターネット接続が必要です。
+- 患者資料の QR コードは種目の詳細ページを指します。`recommendedSlugs` 以外のページは **会員コードでログインしないと閲覧できません**（資料に注記を表示します）。
+- 原本の画像は1枚あたり最大 2〜3MB あるため、PDF のファイルサイズが大きくなります（例: 4種目で約17MB）。
+
+## AI連携の方法（初期版）
+
+有料の AI API は使いません。ChatGPT または Claude（Web版）へのコピー＆貼り付けで連携します。
+
+1. 「① プロンプトと入力内容をコピー」を押す（統合プロンプト＋施術メモ＋選択したセルフケアがコピーされます）
+2. ChatGPT / Claude に貼り付けて送信
+3. 返ってきた JSON を「② AIの返答をここに貼り付け」に貼り付け、「③ 取り込む」
+4. カルテ・患者資料の内容を必ず確認・修正
+
+- 返答は zod スキーマ（`src/ai/schema.ts`）で検証します。不完全な JSON・項目不足はエラー箇所を表示し、貼り付けた内容は消えません。「取り込み前に戻す」で元に戻せます。
+- 施術者が選択していない運動が返ってきても資料には反映しません。特定できない運動は「確認待ち」になります。
+- **お名前・担当者名はプロンプトに含めません。** メモに氏名・電話番号・メール・住所らしき記載があると警告します。
+- 統合プロンプトのルール（`src/ai/prompt.ts`）: 未実施の検査・施術を追加しない／推測で補完しない／主観・客観・仮説を区別／即時効果と長期改善を区別／原因・効果を断定しない／指定外の運動を提案しない／安全上の懸念は確認事項に挙げる、など。
+- AI 処理は `ClinicalAIProvider` インターフェース（`src/ai/provider.ts`）経由です。将来ローカルAIや API を使う場合は Provider を追加します（導入前に費用と患者情報の送信先を必ず確認）。
+
+## PDF の作り方
+
+1. 「④ 患者説明資料」で内容と「印刷前チェック」を確認
+2. 「PDFを出力（印刷）」を押す（画像の読み込み完了を待ってから印刷画面が開きます）
+3. 印刷画面で次のように設定して保存
+   - 送信先: **PDFに保存**
+   - 用紙サイズ: **A4**、向き: **縦**、倍率: **100%（デフォルト）**
+   - **背景のグラフィック: オン**（色付きの見出し・枠を印刷するため）
+
+HTML/CSS の固定テンプレート（`src/components/PatientDocument.tsx`）で組んでいます。運動カードは途中で改ページしないよう設定しています。
+推奨ブラウザ: Google Chrome / Microsoft Edge（Mac・Windows）。Safari（Mac・iPad）でも動作する想定ですが、印刷結果は未検証です。
+
+## セキュリティ上の制約
+
+- 入力内容は **ブラウザのメモリ上だけ** に保持します。localStorage・sessionStorage・IndexedDB・Cookie には保存しません。
+  - **タブを閉じる・再読み込みすると入力内容は消えます。**（入力中はページを閉じる前に確認ダイアログを表示します）
+  - 「一時保存」もメモリ上のスナップショットです。
+- 外部への自動送信はありません（外部通信は selfexercise の公開画像の読み込みのみ）。解析ツールも入れていません。
+- 音声入力（Web Speech API）は、ブラウザによって音声が提供元のサーバーで処理されるため **既定で無効** です。有効化は注意事項を確認したうえで行ってください。
+- リポジトリには架空のサンプルデータだけを置きます。実患者の情報・APIキー・認証情報をコミットしないでください（`.gitignore` で `.env*` などを除外しています）。
+- 初期版はローカル（自分のPC）での利用を前提としています。
+- **将来、外部公開やスタッフでの共同利用を行う場合は、認証（ログイン）・権限管理・暗号化された安全な保存先・アクセスログ・個人情報保護方針への対応が必要です。** 現状の構成のまま公開しないでください。
+
+## 無料運用の条件
+
+- 使用しているライブラリはすべてオープンソース（MIT 等）で無料です。
+- サーバー・データベース・有料クラウドは使いません（ローカルで `npm run dev` / `npm run preview` して利用）。
+- AI は ChatGPT / Claude の Web 版にコピー＆貼り付け（各サービスの無料プランまたは既存の契約の範囲内）。有料 API は使いません。
+- GitHub の Private リポジトリは無料プランで利用できます。
+
+## 今後の開発予定
+
+- 下書きの安全な保存方法（暗号化ファイルへの書き出し等）の検討
+- 画像の縮小による PDF サイズの削減
+- 患者資料テンプレートのバリエーション（1ページ要約版など）
+- ローカルAI（Ollama 等）による Provider の追加検討
+- 音声入力の運用ルール整備と、端末内で完結する音声認識の検討
+- SalonOne との連携（API の有無・規約の確認後）
+- 認証・権限管理・安全な保存先を備えたスタッフ共同利用版
+- 患者別のセルフケア配信

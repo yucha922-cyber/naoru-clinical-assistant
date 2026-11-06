@@ -1,0 +1,107 @@
+@import "@fontsource-variable/noto-sans-jp";
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Noto Sans JP Variable", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI",
+    "Meiryo", sans-serif;
+
+  --color-navy-950: #0a1430;
+  --color-navy-900: #14213d;
+  --color-navy-800: #1f2f55;
+  --color-navy-700: #2d4170;
+  --color-navy-100: #e6eaf3;
+  --color-navy-50: #f4f6fa;
+  --color-gold: #b9975b;
+  --color-gold-light: #e9dcc0;
+
+  --color-sec-pink: #c9577c;
+  --color-sec-pink-bg: #fcf1f5;
+  --color-sec-blue: #3a76c4;
+  --color-sec-blue-bg: #eef4fc;
+  --color-sec-green: #2f8f68;
+  --color-sec-green-bg: #ecf7f1;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  @apply bg-navy-50 text-navy-900 antialiased;
+  font-feature-settings: "palt";
+}
+
+/* 入力欄の共通スタイル */
+.field {
+  @apply w-full rounded-xl border border-navy-100 bg-white px-4 py-3 text-base text-navy-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20;
+}
+
+/* ================= 患者説明資料（A4縦） ================= */
+.a4-sheet {
+  width: 210mm;
+  min-height: 297mm;
+  box-sizing: border-box;
+  padding: 12mm 13mm 14mm;
+  background: white;
+  color: var(--color-navy-900);
+  font-size: 10.5pt;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-break: strict;
+}
+.a4-sheet img {
+  max-width: 100%;
+}
+.avoid-break {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+/* 画面プレビューでの改ページ目安線（297mm ごと） */
+.a4-guides {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(297mm - 1px),
+    rgb(201 87 124 / 0.45) calc(297mm - 1px),
+    rgb(201 87 124 / 0.45) 297mm
+  );
+}
+
+/* 2ページ目以降にも上下の余白が付くよう、余白は @page で指定する */
+@page {
+  size: A4 portrait;
+  margin: 10mm 0 12mm;
+}
+
+@media print {
+  html,
+  body {
+    background: white !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  main,
+  .print-shell {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    background: none !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+    display: block !important;
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .a4-sheet {
+    box-shadow: none !important;
+    margin: 0 !important;
+    min-height: auto;
+    padding: 0 13mm !important;
+  }
+  .a4-guides {
+    background-image: none !important;
+  }
+}
