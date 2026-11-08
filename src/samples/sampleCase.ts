@@ -1,6 +1,6 @@
 import type { Session } from "../domain/session";
 import { emptyKarte } from "../domain/karte";
-import { emptyPatientDoc } from "../domain/session";
+import { emptyPatientDoc, emptyReview } from "../domain/session";
 
 // ★★ 架空のサンプルデータです ★★
 // 実在の患者さんとは一切関係ありません。動作確認・デモ・自動テスト専用です。
@@ -36,6 +36,7 @@ HOPE 仕事終わりも肩を気にせず過ごしたい。趣味のヨガを再
   karte: emptyKarte(),
   patientDoc: emptyPatientDoc(),
   confirmations: [],
+  review: emptyReview(),
 };
 
 /** 上のメモをAIに渡したときの返答例（架空）。取り込み機能のテスト・デモ用 */

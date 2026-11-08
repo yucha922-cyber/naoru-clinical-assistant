@@ -241,7 +241,7 @@ try {
   check("特定できない運動が確認待ちになる", await page.getByText("壁を使ったドリル").first().isVisible());
 
   // 3種目（サンプル）の資料: 新しい構成・イラスト・アイコン・文字サイズ・QR・ページ分割
-  await page.getByRole("button", { name: /患者説明資料/ }).click();
+  await page.locator("nav").getByRole("button", { name: /患者説明資料/ }).click();
   await page.getByTestId("page-count").waitFor();
   await page.waitForTimeout(500);
   const figures = await page.locator("#print-root svg[data-posture]").evaluateAll((els) => els.map((e) => e.getAttribute("data-posture")));
@@ -271,10 +271,10 @@ try {
     pdf3.pages <= 2 && split3.every((c) => c.ok),
     `${pdf3.pages}ページ / ${split3.map((c) => `${c.title}:p${c.titlePage + 1}`).join(", ")}`,
   );
-  await page.getByRole("button", { name: /カルテ入力/ }).click();
+  await page.locator("nav").getByRole("button", { name: /カルテ入力/ }).click();
 
   // カルテ
-  await page.getByRole("button", { name: /カルテ$/ }).click();
+  await page.locator("nav").getByRole("button", { name: /カルテ$/ }).click();
   const karteOut = await page.getByTestId("karte-output").innerText();
   check("カルテが NAORU フォーマットで表示される", karteOut.startsWith("【プラン・頻度】") && karteOut.includes("【主訴】") && !karteOut.includes("【離反理由】"));
   await page.locator('[data-karte-field="history"]').fill("特記なし（架空）");
@@ -284,7 +284,7 @@ try {
   check("AIの確認事項が表示される", await page.getByText("確認事項（AIからの指摘）").isVisible());
 
   // セルフケア選択
-  await page.getByRole("button", { name: /セルフケア選択/ }).click();
+  await page.locator("nav").getByRole("button", { name: /セルフケア選択/ }).click();
   await page.getByLabel("キーワード検索").fill("胸椎");
   const searchCount = await page.locator("ul > li button[aria-pressed]").count();
   check("キーワード検索できる", searchCount >= 1, `${searchCount}件`);
@@ -304,7 +304,7 @@ try {
   check("注意事項が表示される", (await page.getByText("注意事項", { exact: true }).count()) >= 1);
 
   // 患者資料
-  await page.getByRole("button", { name: /患者説明資料/ }).click();
+  await page.locator("nav").getByRole("button", { name: /患者説明資料/ }).click();
   const sheet = page.getByTestId("a4-sheet");
   await page.evaluate(async () => {
     const imgs = Array.from(document.querySelectorAll("#print-root img"));
@@ -377,10 +377,10 @@ try {
   p2.on("dialog", (d) => d.accept());
   await p2.goto(BASE);
   await p2.getByRole("button", { name: "サンプル（架空）" }).click();
-  await p2.getByRole("button", { name: /セルフケア選択/ }).click();
+  await p2.locator("nav").getByRole("button", { name: /セルフケア選択/ }).click();
   await p2.getByRole("button", { name: "五十肩", exact: true }).click();
   await p2.locator("ul > li button[aria-pressed]", { hasText: "振り子運動" }).click();
-  await p2.getByRole("button", { name: /患者説明資料/ }).click();
+  await p2.locator("nav").getByRole("button", { name: /患者説明資料/ }).click();
   await p2.waitForSelector("#print-root [data-broken-image]");
   const pre = await p2.getByTestId("preflight").innerText();
   check("画像の欠落を検出して印刷前チェックに表示", pre.includes("画像を読み込めません") && pre.includes("顎引き"));
@@ -439,19 +439,19 @@ try {
 
   await prog.getByText("ステップ2/2：カルテを作成中").waitFor({ timeout: 8000 });
   const patientDoneShown = await prog.getByText("患者資料は完成しています").isVisible();
-  await p3.getByRole("button", { name: /患者説明資料/ }).click();
+  await p3.locator("nav").getByRole("button", { name: /患者説明資料/ }).click();
   const goalWhileKarte = await p3.locator("[data-doc-goal]").innerText().catch(() => "");
-  await p3.getByRole("button", { name: /^3カルテ$|カルテ$/ }).last().click();
+  await p3.locator("nav").getByRole("button", { name: /^3カルテ$|カルテ$/ }).last().click();
   const karteWhile = await p3.locator('[data-karte-field="chiefComplaint"]').inputValue();
   check(
     "B: 患者資料が先に完成して④に反映され、その間カルテは作成中",
     patientDoneShown && goalWhileKarte.includes("架空の目標です") && karteWhile === "",
     `④の目標「${goalWhileKarte.replace(/\s+/g, "")}」/ ③の主訴「${karteWhile}」`,
   );
-  await p3.getByRole("button", { name: /カルテ入力/ }).click();
+  await p3.locator("nav").getByRole("button", { name: /カルテ入力/ }).click();
   const stillRunning = await prog.isVisible();
   await p3.getByText("カルテと患者資料を作成しました").waitFor({ timeout: 15000 });
-  await p3.getByRole("button", { name: /^3カルテ$|カルテ$/ }).last().click();
+  await p3.locator("nav").getByRole("button", { name: /^3カルテ$|カルテ$/ }).last().click();
   const karteAfter = await p3.locator('[data-karte-field="chiefComplaint"]').inputValue();
   check("B: タブを移動しても生成は続き、完了後にカルテが反映される", stillRunning && karteAfter === "架空の主訴（テスト）", `戻ったとき作成中表示=${stillRunning} / 主訴「${karteAfter}」`);
   await ctx3.close();
@@ -473,7 +473,7 @@ try {
   const errBox = p4.locator("[data-screen=input]").getByRole("alert").filter({ hasText: "一部を作成できませんでした" });
   await errBox.waitFor({ timeout: 20000 });
   const errText = await errBox.innerText();
-  await p4.getByRole("button", { name: /^3カルテ$|カルテ$/ }).last().click();
+  await p4.locator("nav").getByRole("button", { name: /^3カルテ$|カルテ$/ }).last().click();
   const karteF = await p4.locator('[data-karte-field="chiefComplaint"]').inputValue();
   check(
     "片方の段階が失敗しても、もう片方は反映し、失敗の理由を表示する",
@@ -481,6 +481,68 @@ try {
     errText.replace(/\n/g, " ").slice(0, 70),
   );
   await ctx4.close();
+
+  // ---------- 臨床チェック（元メモとの照合・施術者の承認） ----------
+  const ctx6 = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  await routeImages(ctx6);
+  const p6 = await ctx6.newPage();
+  const dialogs6 = [];
+  p6.on("dialog", (d) => {
+    dialogs6.push(d.message());
+    d.accept();
+  });
+  await p6.goto(BASE);
+  await p6.getByRole("button", { name: "サンプル（架空）" }).click();
+  await p6.getByRole("tab", { name: "ChatGPT／Claudeにコピー" }).click();
+  await p6.getByRole("button", { name: "返答例（架空）を貼る" }).click();
+  await p6.getByRole("button", { name: "③ 取り込む" }).click();
+  await p6.locator("nav").getByRole("button", { name: /^3カルテ$|カルテ$/ }).last().click();
+  const karteScreen = p6.locator("[data-screen=karte]");
+  const noWarn = (await karteScreen.getByText("元メモとの照合で、指摘はありませんでした").count()) === 1;
+  const memoShown = (await karteScreen.getByTestId("memo-view").innerText()).includes("頸椎回旋 右45度");
+  const badges = await karteScreen.getByText("臨床仮説", { exact: true }).count();
+  check("元メモどおりの内容では指摘が出ず、元メモと情報の種類（申告・事実・仮説など）が表示される", noWarn && memoShown && badges >= 1);
+
+  // メモに無い数値・実施していない検査を書き込むと「要確認」になり、確認が済むまで確定できない
+  await karteScreen.locator('[data-karte-field="effect"]').fill("頸椎右回旋 45°→70°、NRS 6→2");
+  await karteScreen.locator('[data-karte-field="examination"]').fill("頸椎回旋 右45° 左60°\nSLR test 陰性");
+  const review = karteScreen.getByTestId("review-karte");
+  const reviewText = await review.innerText();
+  const confirmBtn = karteScreen.getByTestId("confirm-karte");
+  const disabledBefore = await confirmBtn.isDisabled();
+  check(
+    "元メモに無い数値（70°・NRS）と実施記録の無い検査（SLR）を「要確認」として表示し、確定できない",
+    reviewText.includes("数値「70」") && reviewText.includes("数値「6」") && reviewText.includes("検査「SLRテスト」") && disabledBefore,
+  );
+  // 「該当箇所を直す」で入力欄へ移動する
+  await review.locator("li", { hasText: "検査「SLRテスト」" }).getByRole("button", { name: "該当箇所を直す" }).click();
+  const focused = await p6.evaluate(() => document.activeElement?.getAttribute("data-karte-field"));
+  check("「該当箇所を直す」で該当する入力欄に移動する", focused === "examination", `フォーカス: ${focused}`);
+  // 修正（SLR を消す）と承認（数値は確認済みにする）で確定できるようになる
+  await karteScreen.locator('[data-karte-field="examination"]').fill("頸椎回旋 右45° 左60°");
+  const pending = review.getByRole("button", { name: "確認したので問題なし" });
+  for (let i = 0; i < 10 && (await pending.count()) > 0; i++) await pending.first().click();
+  const enabledAfter = await confirmBtn.isEnabled();
+  await confirmBtn.click();
+  const confirmedShown = await karteScreen.getByTestId("confirmed-karte").isVisible();
+  check("修正または「確認したので問題なし」で、カルテを確認済みにできる", enabledAfter && confirmedShown);
+
+  // 患者資料: 評価していない姿勢・原因の断定を指摘する。確認前に PDF 出力しようとすると確認を求める
+  await p6.locator("nav").getByRole("button", { name: /患者説明資料/ }).click();
+  await p6.locator('[data-doc-field="currentPoints"]').fill("骨盤の歪みがすべての原因です\n首を右に向ける動きに制限がみられました");
+  const docReview = await p6.getByTestId("review-patient").innerText();
+  check(
+    "患者資料: 評価記録の無い姿勢（骨盤の歪み）と原因の断定を「要確認」として表示する",
+    docReview.includes("骨盤の歪み・左右差") && docReview.includes("原因の断定"),
+  );
+  dialogs6.length = 0;
+  await p6.evaluate(() => {
+    window.print = () => {};
+  });
+  await p6.getByRole("button", { name: "PDFを出力（印刷）" }).click();
+  await p6.waitForTimeout(500);
+  check("確認が済んでいない資料を出力しようとすると、確認を求める", dialogs6.some((m) => m.includes("まだ済んでいません")), dialogs6[0] ?? "ダイアログなし");
+  await ctx6.close();
 
   // ---------- セルフケアの種目数ごとのレイアウト・情報が無い項目・長文 ----------
   const ctx5 = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
@@ -493,13 +555,13 @@ try {
   await p5.getByRole("button", { name: "返答例（架空）を貼る" }).click();
   await p5.getByRole("button", { name: "③ 取り込む" }).click();
   const toggleExercise = async (name, on) => {
-    await p5.getByRole("button", { name: /セルフケア選択/ }).click();
+    await p5.locator("nav").getByRole("button", { name: /セルフケア選択/ }).click();
     await p5.getByLabel("キーワード検索").fill(name);
     await p5.locator(`[data-screen=selfcare] ul > li button[aria-pressed=${on ? "false" : "true"}]`, { hasText: name }).first().click();
     await p5.getByLabel("キーワード検索").fill("");
   };
   const openDoc = async () => {
-    await p5.getByRole("button", { name: /患者説明資料/ }).click();
+    await p5.locator("nav").getByRole("button", { name: /患者説明資料/ }).click();
     await p5.waitForTimeout(800);
   };
 

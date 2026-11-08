@@ -40,3 +40,23 @@ describe("splitLines", () => {
     expect(splitLines("・a\n- b\n\n1. c")).toEqual(["a", "b", "c"]);
   });
 });
+
+describe("施術者による確認（review）", () => {
+  it("確認済みの付け外しができ、AIで作り直した部分の確認はリセットされる", async () => {
+    const { parseAIResponse } = await import("../ai/parse");
+    const { SAMPLE_AI_RESPONSE, SAMPLE_SESSION } = await import("../samples/sampleCase");
+    const r = parseAIResponse(SAMPLE_AI_RESPONSE, SAMPLE_SESSION.selections.map((x) => x.slug));
+    if (!r.ok) throw new Error();
+    let s = sessionReducer(SAMPLE_SESSION, { type: "approveCheck", id: "karte:effect:num:70", approved: true });
+    s = sessionReducer(s, { type: "approveCheck", id: "patient:goal:hope:diff", approved: true });
+    s = sessionReducer(s, { type: "setConfirmed", part: "karte", value: true });
+    s = sessionReducer(s, { type: "setConfirmed", part: "doc", value: true });
+    expect(s.review).toEqual({ approved: ["karte:effect:num:70", "patient:goal:hope:diff"], karteConfirmed: true, docConfirmed: true });
+    // 患者資料だけ作り直す → 資料側の確認だけやり直し
+    const s2 = sessionReducer(s, { type: "applyAI", output: r.value, parts: ["patient"] });
+    expect(s2.review).toEqual({ approved: ["karte:effect:num:70"], karteConfirmed: true, docConfirmed: false });
+    // 取り消し
+    const s3 = sessionReducer(s2, { type: "approveCheck", id: "karte:effect:num:70", approved: false });
+    expect(s3.review.approved).toEqual([]);
+  });
+});
