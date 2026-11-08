@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SELFCARE, findExercise, searchExercises } from "./selfcare";
+import { SELFCARE, SEARCH_SYNONYMS, findExercise, searchExercises } from "./selfcare";
 
 describe("selfcare.json（selfexercise から生成）", () => {
   it("スキーマ検証に通り、種目がある", () => {
@@ -31,5 +31,27 @@ describe("selfcare.json（selfexercise から生成）", () => {
     const hiza = searchExercises(SELFCARE.exercises, { part: "hiza" });
     hiza.forEach((e) => expect(e.bodyPart.some((c) => c.slug === "hiza")).toBe(true));
     expect(searchExercises(SELFCARE.exercises, { keyword: "zzzz存在しない" })).toEqual([]);
+  });
+});
+
+describe("検索の改善（言い換え・表記ゆれ）", () => {
+  const titles = (k: string) => searchExercises(SELFCARE.exercises, { keyword: k }).map((e) => e.title);
+  it("「胸筋」「大胸筋」「胸のストレッチ」で胸筋ストレッチが先頭に出る", () => {
+    expect(titles("胸筋")[0]).toBe("胸筋ストレッチ");
+    expect(titles("大胸筋")).toContain("胸筋ストレッチ");
+    expect(titles("胸のストレッチ")[0]).toBe("胸筋ストレッチ");
+  });
+  it("言い換え（太もも裏・あご引き・カーフ）とカタカナ／ひらがなの違いを吸収する", () => {
+    expect(titles("太もも裏")).toContain("ハムストリングスストレッチ");
+    expect(titles("あご引き")).toContain("顎引きエクササイズ");
+    expect(titles("カーフ")).toContain("ふくらはぎストレッチ");
+    expect(titles("すとれっち").length).toBe(titles("ストレッチ").length);
+  });
+  it("医学的に異なるものは同じ扱いにしない（大胸筋で小胸筋を探さない・胸筋で腸腰筋を出さない）", () => {
+    expect(SEARCH_SYNONYMS.flat()).not.toContain("小胸筋");
+    expect(titles("大胸筋")).not.toContain("腸腰筋ストレッチ");
+  });
+  it("すべての検索語に一致するものだけを出す", () => {
+    expect(titles("胸 ふくらはぎ")).toEqual([]);
   });
 });

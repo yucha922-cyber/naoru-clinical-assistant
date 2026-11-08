@@ -4,6 +4,8 @@ import { findExercise } from "../data/selfcare";
 import { PatientDocument, type ResolvedSelection } from "../components/PatientDocument";
 import { FitToWidth } from "../components/FitToWidth";
 import { ClinicalReview } from "../components/ClinicalReview";
+import { useCopyKarte } from "../lib/useCopyKarte";
+import { isKarteEmpty } from "../domain/karte";
 import { MIND_ICON_COMPONENTS } from "../doc/mindIcons";
 import { PostureFigure } from "../doc/PostureFigure";
 import { BODY_AREAS, MIND_ICONS, POSTURES, guessMindIcon, type MindIcon } from "../doc/postures";
@@ -19,6 +21,7 @@ import { waitForImages } from "../lib/images";
 
 export function DocumentScreen() {
   const { session, dispatch, setTab, brokenImages } = useApp();
+  const copyKarte = useCopyKarte();
   const [printing, setPrinting] = useState(false);
   const [guides, setGuides] = useState(true);
   const [showSteps, setShowSteps] = useState(false);
@@ -121,6 +124,7 @@ export function DocumentScreen() {
     const title = document.title;
     document.title = `セルフケアのご案内_${session.meta.visitDate.replaceAll("-", "")}`;
     window.print();
+    dispatch({ type: "markOutput", kind: "pdfPrinted" });
     document.title = title;
   };
 
@@ -235,7 +239,7 @@ export function DocumentScreen() {
         <ClinicalReview area="patient" />
 
         <Card>
-          <CardTitle title="印刷前チェック" />
+          <CardTitle title="仕上げ（印刷前チェック・カルテのコピー・PDF出力）" />
           <p className="mb-3 text-sm font-semibold" data-testid="page-count">
             {pages === 1 ? "✓ A4 1枚に収まっています" : `A4 ${pages} ページ`}
           </p>
@@ -255,9 +259,14 @@ export function DocumentScreen() {
               ))}
             </ul>
           )}
-          <Button variant="gold" size="lg" className="mt-4 w-full" onClick={print} disabled={printing}>
-            {printing ? "画像を読み込み中…" : "PDFを出力（印刷）"}
-          </Button>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+            <Button size="lg" onClick={copyKarte} disabled={isKarteEmpty(session.karte)}>
+              {session.output.karteCopied ? "✓ " : ""}カルテをコピー
+            </Button>
+            <Button variant="gold" size="lg" onClick={print} disabled={printing}>
+              {printing ? "画像を読み込み中…" : `${session.output.pdfPrinted ? "✓ " : ""}PDFを出力（印刷）`}
+            </Button>
+          </div>
           <p className="mt-2 text-xs leading-relaxed text-slate-500">
             印刷画面で「送信先: PDFに保存」、用紙サイズ A4・倍率 100%・余白「なし」または「デフォルト」・「背景のグラフィック」をオンにしてください。
           </p>
@@ -265,6 +274,9 @@ export function DocumentScreen() {
             <input type="checkbox" checked={guides} onChange={(e) => setGuides(e.target.checked)} />
             プレビューに改ページの目安線（A4の高さごと）を表示
           </label>
+          <Button className="mt-3 w-full" variant="ghost" onClick={() => setTab("selfcare")}>
+            ← セルフケア選択へ戻る
+          </Button>
         </Card>
       </div>
 

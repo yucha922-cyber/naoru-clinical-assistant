@@ -274,7 +274,7 @@ try {
   await page.locator("nav").getByRole("button", { name: /カルテ入力/ }).click();
 
   // カルテ
-  await page.locator("nav").getByRole("button", { name: /カルテ$/ }).click();
+  await page.locator("nav").getByRole("button", { name: /カルテ確認/ }).click();
   const karteOut = await page.getByTestId("karte-output").innerText();
   check("カルテが NAORU フォーマットで表示される", karteOut.startsWith("【プラン・頻度】") && karteOut.includes("【主訴】") && !karteOut.includes("【離反理由】"));
   await page.locator('[data-karte-field="history"]').fill("特記なし（架空）");
@@ -359,12 +359,25 @@ try {
 
   // 個人情報の取り扱い
   const storage = await page.evaluate(async () => ({
-    local: localStorage.length,
+    localKeys: Object.keys(localStorage),
+    localValues: Object.keys(localStorage).map((k) => localStorage.getItem(k)),
     session: sessionStorage.length,
     idb: indexedDB.databases ? (await indexedDB.databases()).length : 0,
     cookie: document.cookie,
+    url: location.href,
   }));
-  check("ブラウザのストレージに保存しない", storage.local === 0 && storage.session === 0 && storage.idb === 0 && storage.cookie === "", JSON.stringify(storage));
+  // 保存してよいのは「お気に入り・最近使った運動」の運動IDだけ（患者情報は保存しない）
+  const prefsOnly =
+    storage.localKeys.every((k) => k === "naoru.selfcarePrefs.v1") &&
+    storage.localValues.every((v) => {
+      const o = JSON.parse(v);
+      return [...(o.favorites ?? []), ...(o.recent ?? [])].every((x) => /^[a-z0-9-]+$/.test(x)) && !/架空|頸椎|主訴|施術/.test(v);
+    });
+  check(
+    "患者情報をブラウザのストレージ・Cookie・URL に残さない（保存されるのは運動IDの設定だけ）",
+    prefsOnly && storage.session === 0 && storage.idb === 0 && storage.cookie === "" && storage.url === BASE,
+    JSON.stringify({ keys: storage.localKeys, values: storage.localValues, url: storage.url }),
+  );
   const leaked = consoleText.filter((t) => t.includes("架空") || t.includes("頸椎") || t.includes("PAGEERROR"));
   check("コンソールに患者データ・エラーを出力しない", leaked.length === 0, leaked.slice(0, 3).join(" | "));
   check("外部への通信がない（selfexercise 画像を除く）", external.length === 0, external.slice(0, 3).join(", "));
@@ -441,7 +454,7 @@ try {
   const patientDoneShown = await prog.getByText("患者資料は完成しています").isVisible();
   await p3.locator("nav").getByRole("button", { name: /患者説明資料/ }).click();
   const goalWhileKarte = await p3.locator("[data-doc-goal]").innerText().catch(() => "");
-  await p3.locator("nav").getByRole("button", { name: /^3カルテ$|カルテ$/ }).last().click();
+  await p3.locator("nav").getByRole("button", { name: /カルテ確認/ }).click();
   const karteWhile = await p3.locator('[data-karte-field="chiefComplaint"]').inputValue();
   check(
     "B: 患者資料が先に完成して④に反映され、その間カルテは作成中",
@@ -451,7 +464,7 @@ try {
   await p3.locator("nav").getByRole("button", { name: /カルテ入力/ }).click();
   const stillRunning = await prog.isVisible();
   await p3.getByText("カルテと患者資料を作成しました").waitFor({ timeout: 15000 });
-  await p3.locator("nav").getByRole("button", { name: /^3カルテ$|カルテ$/ }).last().click();
+  await p3.locator("nav").getByRole("button", { name: /カルテ確認/ }).click();
   const karteAfter = await p3.locator('[data-karte-field="chiefComplaint"]').inputValue();
   check("B: タブを移動しても生成は続き、完了後にカルテが反映される", stillRunning && karteAfter === "架空の主訴（テスト）", `戻ったとき作成中表示=${stillRunning} / 主訴「${karteAfter}」`);
   await ctx3.close();
@@ -473,7 +486,7 @@ try {
   const errBox = p4.locator("[data-screen=input]").getByRole("alert").filter({ hasText: "一部を作成できませんでした" });
   await errBox.waitFor({ timeout: 20000 });
   const errText = await errBox.innerText();
-  await p4.locator("nav").getByRole("button", { name: /^3カルテ$|カルテ$/ }).last().click();
+  await p4.locator("nav").getByRole("button", { name: /カルテ確認/ }).click();
   const karteF = await p4.locator('[data-karte-field="chiefComplaint"]').inputValue();
   check(
     "片方の段階が失敗しても、もう片方は反映し、失敗の理由を表示する",
@@ -496,7 +509,7 @@ try {
   await p6.getByRole("tab", { name: "ChatGPT／Claudeにコピー" }).click();
   await p6.getByRole("button", { name: "返答例（架空）を貼る" }).click();
   await p6.getByRole("button", { name: "③ 取り込む" }).click();
-  await p6.locator("nav").getByRole("button", { name: /^3カルテ$|カルテ$/ }).last().click();
+  await p6.locator("nav").getByRole("button", { name: /カルテ確認/ }).click();
   const karteScreen = p6.locator("[data-screen=karte]");
   const noWarn = (await karteScreen.getByText("元メモとの照合で、指摘はありませんでした").count()) === 1;
   const memoShown = (await karteScreen.getByTestId("memo-view").innerText()).includes("頸椎回旋 右45度");
@@ -543,6 +556,92 @@ try {
   await p6.waitForTimeout(500);
   check("確認が済んでいない資料を出力しようとすると、確認を求める", dialogs6.some((m) => m.includes("まだ済んでいません")), dialogs6[0] ?? "ダイアログなし");
   await ctx6.close();
+
+  // ---------- 操作性: 工程表示・次へ・上書き確認・お気に入り・検索・目的の追記 ----------
+  const ctx7 = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  await ctx7.grantPermissions(["clipboard-read", "clipboard-write"], { origin: BASE.slice(0, -1) });
+  await routeImages(ctx7);
+  const p7 = await ctx7.newPage();
+  const dialogs7 = [];
+  p7.on("dialog", (d) => {
+    dialogs7.push(d.message());
+    d.accept();
+  });
+  await p7.goto(BASE);
+  const stepDone = async () =>
+    p7.getByTestId("workflow-steps").locator("button[data-step]").evaluateAll((els) => els.map((e) => (e.getAttribute("data-done") === "true" ? "✓" : "・")).join(""));
+  const steps0 = await stepDone();
+  await p7.getByRole("button", { name: "サンプル（架空）" }).click();
+  const steps1 = await stepDone();
+  await p7.getByRole("tab", { name: "ChatGPT／Claudeにコピー" }).click();
+  await p7.getByRole("button", { name: "返答例（架空）を貼る" }).click();
+  await p7.getByRole("button", { name: "③ 取り込む" }).click();
+  const steps2 = await stepDone();
+  const step3Text = await p7.getByTestId("workflow-steps").locator("button[data-step='3']").innerText();
+  // サンプルはセルフケア選択済みのため、読み込み直後に④も完了。取り込み後は「確認待ちの運動」があるため④は未完了に戻る
+  check("工程表示: 入力 → AI作成 の進み具合と、未確認・確認待ちを表示する", steps0 === "・・・・・" && steps1 === "✓・・✓・" && steps2 === "✓✓・・・" && step3Text.includes("未確認"), `${steps0} → ${steps1} → ${steps2} / ${step3Text.replace(/\n/g, " ")}`);
+
+  // 作成済みの内容がある状態で取り込み直すと、上書きの確認が出る
+  dialogs7.length = 0;
+  await p7.getByRole("button", { name: "③ 取り込む" }).click();
+  check("作成済みの内容をAIの結果で上書きする前に確認する", dialogs7.some((m) => m.includes("上書き")), dialogs7[0] ?? "ダイアログなし");
+
+  // 次へボタンで、業務の順番に画面を移動できる
+  await p7.getByRole("button", { name: "次へ：作成した内容を確認する →" }).click();
+  const onKarte = await p7.locator("[data-screen=karte]").isVisible();
+  await p7.getByTestId("confirm-karte").click();
+  await p7.getByRole("button", { name: "次へ：セルフケアを選ぶ →" }).click();
+  const onSelfcare = await p7.locator("[data-screen=selfcare]").isVisible();
+  check("「次へ」ボタンで カルテ確認 → セルフケア選択 と進める", onKarte && onSelfcare);
+
+  // 検索の言い換え
+  await p7.getByLabel("キーワード検索").fill("胸のストレッチ");
+  const firstHit = await p7.locator("[data-screen=selfcare] ul > li").first().locator("span.font-bold").first().innerText();
+  await p7.getByLabel("キーワード検索").fill("太もも裏");
+  const hamHit = await p7.locator("[data-screen=selfcare] ul > li", { hasText: "ハムストリングス" }).count();
+  check("検索: 「胸のストレッチ」で胸筋ストレッチが先頭、「太もも裏」でハムストリングスが出る", firstHit === "胸筋ストレッチ" && hamHit === 1, `先頭「${firstHit}」`);
+  await p7.getByLabel("キーワード検索").fill("");
+
+  // お気に入り・最近使った運動
+  await p7.getByRole("button", { name: "胸筋ストレッチ をお気に入りに追加" }).click();
+  await p7.locator("[data-screen=selfcare] ul > li button[aria-pressed=false]", { hasText: "クラムシェル" }).first().click();
+  const favRow = await p7.getByTestId("fav-row").innerText();
+  const recentRow = await p7.getByTestId("recent-row").innerText();
+  check("お気に入り・最近使った運動が一覧の上に表示される", favRow.includes("胸筋ストレッチ") && recentRow.includes("クラムシェル"), `${favRow.replace(/\n/g, " ")} / ${recentRow.replace(/\n/g, " ")}`);
+
+  // 運動の目的（ライブラリ）・部位の表示と、目的の追記
+  const purposeBox = await p7.getByTestId("purpose-kata-chest-stretch").innerText();
+  await p7.getByLabel("胸筋ストレッチ の目的の追記").fill("胸の前側をゆっくり伸ばし、肩を動かしやすくするための運動です（架空）");
+  await p7.locator("nav").getByRole("button", { name: /患者説明資料/ }).click();
+  const docPurpose = await p7.locator("[data-doc-exercise=kata-chest-stretch] [data-doc-purpose]").innerText();
+  check(
+    "セルフケア: どこを動かす運動か・目的（ライブラリ）を表示し、追記した目的が資料に反映される",
+    purposeBox.includes("どこを動かす運動か") && purposeBox.includes("大胸筋") && docPurpose.includes("肩を動かしやすくするための運動です（架空）"),
+  );
+
+  // 仕上げ: 資料画面からカルテのコピーと PDF 出力ができ、工程がすべて完了になる
+  await p7.getByTestId("confirm-patient").click();
+  // 確認待ちの運動（AIが挙げた「壁を使ったドリル」）を、確認したうえで消す
+  await p7.locator("nav").getByRole("button", { name: /カルテ入力/ }).click();
+  const clearPending = p7.locator("[data-screen=input]").getByRole("button", { name: "確認済みにして消す" });
+  for (let i = 0; i < 5 && (await clearPending.count()) > 0; i++) await clearPending.first().click();
+  await p7.locator("nav").getByRole("button", { name: /患者説明資料/ }).click();
+  await p7.evaluate(() => {
+    window.print = () => {};
+  });
+  await p7.locator("[data-screen=document]").getByRole("button", { name: /カルテをコピー/ }).click();
+  const copied = await p7.evaluate(() => navigator.clipboard.readText());
+  await p7.locator("[data-screen=document]").getByRole("button", { name: /PDFを出力/ }).click();
+  await p7.waitForTimeout(500);
+  const stepsEnd = await stepDone();
+  check("資料画面からカルテのコピーと PDF 出力ができ、5つの工程がすべて完了になる", copied.startsWith("【プラン・頻度】") && stepsEnd === "✓✓✓✓✓", `工程 ${stepsEnd}`);
+
+  // ページを開き直すと、お気に入りは残り、患者の入力内容は残らない
+  await p7.reload();
+  const favAfter = await p7.locator("[data-screen=selfcare]").getByTestId("fav-row").innerText().catch(() => "");
+  const memoAfter = await p7.getByLabel("施術メモ").inputValue();
+  check("開き直すと、お気に入りは残り、患者の入力内容は残らない", favAfter.includes("胸筋ストレッチ") && memoAfter === "", `お気に入り「${favAfter.replace(/\n/g, " ").slice(0, 30)}」/ メモ「${memoAfter}」`);
+  await ctx7.close();
 
   // ---------- セルフケアの種目数ごとのレイアウト・情報が無い項目・長文 ----------
   const ctx5 = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
@@ -659,7 +758,7 @@ try {
     p.on("dialog", (d) => d.accept());
     await p.goto(BASE);
     await p.getByRole("button", { name: "サンプル（架空）" }).click();
-    const tabs = ["カルテ入力", "セルフケア選択", "カルテ", "患者説明資料"];
+    const tabs = ["カルテ入力", "カルテ確認", "セルフケア選択", "患者説明資料"];
     let ok = true;
     const bad = [];
     for (const t of tabs) {

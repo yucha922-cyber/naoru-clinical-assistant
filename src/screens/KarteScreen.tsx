@@ -3,14 +3,14 @@ import { useApp } from "../state";
 import { KARTE_FIELDS, formatKarte, isKarteEmpty } from "../domain/karte";
 import { findExercise } from "../data/selfcare";
 import { Button, Card, CardTitle, Notice } from "../components/ui";
-import { copyText } from "../lib/clipboard";
+import { useCopyKarte } from "../lib/useCopyKarte";
 import { ClinicalReview } from "../components/ClinicalReview";
 import { KARTE_CATEGORY, CATEGORY_STYLE } from "../domain/karteCategory";
 
 const rowsFor = (text: string) => Math.min(14, Math.max(2, text.split("\n").length + Math.floor(text.length / 60)));
 
 export function KarteScreen() {
-  const { session, dispatch, notify } = useApp();
+  const { session, dispatch, setTab } = useApp();
   const [memoOpen, setMemoOpen] = useState(true);
   const [showAll, setShowAll] = useState(true);
   const karte = session.karte;
@@ -24,18 +24,7 @@ export function KarteScreen() {
     .filter(Boolean)
     .join("\n");
 
-  const copy = async () => {
-    if (output === "") {
-      notify("カルテが空です");
-      return;
-    }
-    if (
-      !session.review.karteConfirmed &&
-      !window.confirm("カルテの内容の確認（右の「内容の確認」）がまだ済んでいません。このままコピーしますか？")
-    )
-      return;
-    notify((await copyText(output)) ? "カルテをコピーしました。SalonOne に貼り付けてください" : "コピーできませんでした");
-  };
+  const copy = useCopyKarte();
 
   const fields = KARTE_FIELDS.filter((f) => showAll || karte[f.key].trim() !== "");
 
@@ -83,6 +72,14 @@ export function KarteScreen() {
               />
             </label>
           ))}
+        </div>
+        <div className="mt-5 grid gap-2 border-t border-navy-100 pt-4 sm:grid-cols-2">
+          <Button size="lg" onClick={() => setTab("input")}>
+            ← カルテ入力へ戻る
+          </Button>
+          <Button variant="primary" size="lg" onClick={() => setTab("selfcare")}>
+            次へ：セルフケアを選ぶ →
+          </Button>
         </div>
       </Card>
 

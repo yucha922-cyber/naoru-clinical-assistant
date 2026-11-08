@@ -8,11 +8,13 @@ import { DocumentScreen } from "./screens/DocumentScreen";
 import { SelfcareScreen } from "./screens/SelfcareScreen";
 import { Button } from "./components/ui";
 import { APP_CONFIG } from "./config/app";
+import { WorkflowSteps } from "./components/WorkflowSteps";
 
+// 通常業務の順番: 入力・AI作成 → カルテ確認 → セルフケア選択 → 患者説明資料（PDF）
 const TABS: { id: Tab; num: string; label: string }[] = [
   { id: "input", num: "1", label: "カルテ入力" },
-  { id: "selfcare", num: "2", label: "セルフケア選択" },
-  { id: "karte", num: "3", label: "カルテ" },
+  { id: "karte", num: "2", label: "カルテ確認" },
+  { id: "selfcare", num: "3", label: "セルフケア選択" },
   { id: "document", num: "4", label: "患者説明資料" },
 ];
 
@@ -93,7 +95,9 @@ export default function App() {
         </nav>
       </header>
 
-      <div className="no-print mx-auto max-w-7xl px-4 pt-4 sm:px-6">
+      <WorkflowSteps />
+
+      <div className="no-print mx-auto max-w-7xl px-4 pt-3 sm:px-6">
         <p className="rounded-xl bg-white px-4 py-2 text-xs text-slate-600 ring-1 ring-navy-100">
           🔒 入力内容はこの画面（メモリ）にだけ保持され、どこにも自動送信・保存されません。
           <strong className="text-navy-900">タブを閉じる・再読み込みすると消えます。</strong>

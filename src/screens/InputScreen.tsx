@@ -153,6 +153,9 @@ export function InputScreen() {
         </Card>
 
         <AIPanel onEmptyMemo={() => memoRef.current?.focus()} />
+        <Button variant="primary" size="lg" className="w-full" onClick={() => setTab("karte")}>
+          次へ：作成した内容を確認する →
+        </Button>
       </div>
     </div>
   );

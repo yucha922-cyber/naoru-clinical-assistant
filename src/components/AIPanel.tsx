@@ -129,6 +129,18 @@ export function AIPanel({ onEmptyMemo }: { onEmptyMemo: () => void }) {
     notify(ok ? "プロンプトをコピーしました。ChatGPT / Claude に貼り付けてください" : "コピーできませんでした");
   };
 
+  /** 作成済みの内容があるときは、AIの結果で上書きしてよいか確認する（「取り込み前に戻す」でも戻せる） */
+  const confirmOverwrite = () => {
+    const hasContent =
+      Object.values(session.karte).some((v) => v.trim()) ||
+      session.patientDoc.currentPoints.trim() !== "" ||
+      session.patientDoc.idealPoints.trim() !== "";
+    return (
+      !hasContent ||
+      window.confirm("すでに作成済みのカルテ・患者資料があります。AIの結果で上書きしますか？\n（上書き後も「取り込み前に戻す」で元に戻せます）")
+    );
+  };
+
   const runLocal = async () => {
     if (session.memo.trim() === "") {
       notify("施術メモを入力してください");
@@ -144,6 +156,7 @@ export function AIPanel({ onEmptyMemo }: { onEmptyMemo: () => void }) {
       return;
     }
     if (!gpu?.ok) return;
+    if (!confirmOverwrite()) return;
     const modelId = resolveModelId(modelKey, gpu.shaderF16);
     if (!downloaded[modelKey]) {
       const model = LOCAL_MODELS.find((x) => x.key === modelKey)!;
@@ -408,7 +421,7 @@ export function AIPanel({ onEmptyMemo }: { onEmptyMemo: () => void }) {
             onChange={(e) => setAiText(e.target.value)}
             placeholder="AIの返答（JSON）を丸ごと貼り付けてください"
           />
-          <Button variant="primary" size="lg" className="mt-3 w-full" onClick={() => importText(aiText)} disabled={aiText.trim() === ""}>
+          <Button variant="primary" size="lg" className="mt-3 w-full" onClick={() => confirmOverwrite() && importText(aiText)} disabled={aiText.trim() === ""}>
             ③ 取り込む
           </Button>
         </div>
