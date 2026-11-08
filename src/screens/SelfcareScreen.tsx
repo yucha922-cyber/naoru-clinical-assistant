@@ -6,6 +6,7 @@ import { ExerciseImage, NoImage } from "../components/ExerciseImage";
 import { QrCode } from "../components/QrCode";
 import { SelectedSummary } from "../components/SelectedSummary";
 import { copyText } from "../lib/clipboard";
+import { usePrefs } from "../lib/usePrefs";
 
 export function SelfcareScreen() {
   const { session, dispatch, setTab, notify } = useApp();
@@ -13,15 +14,45 @@ export function SelfcareScreen() {
   const [symptom, setSymptom] = useState<string | null>(null);
   const [part, setPart] = useState<string | null>(null);
   const [mode, setMode] = useState<"symptom" | "part">("symptom");
+  const [onlyFav, setOnlyFav] = useState(false);
+  const { prefs, toggleFavorite, addRecent, clearRecent } = usePrefs();
+  const favorites = new Set(prefs.favorites);
 
-  const results = useMemo(
-    () => searchExercises(SELFCARE.exercises, { keyword, symptom, part }),
-    [keyword, symptom, part],
-  );
+  const results = useMemo(() => {
+    const r = searchExercises(SELFCARE.exercises, { keyword, symptom, part });
+    return onlyFav ? r.filter((e) => prefs.favorites.includes(e.slug)) : r;
+  }, [keyword, symptom, part, onlyFav, prefs.favorites]);
   const selected = new Set(session.selections.map((s) => s.slug));
 
-  const toggle = (ex: Exercise) =>
+  const toggle = (ex: Exercise) => {
+    if (!selected.has(ex.slug)) addRecent(ex.slug); // 最近使った運動（運動IDだけを記録）
     dispatch({ type: "toggleExercise", slug: ex.slug, defaultDosage: ex.duration ?? "" });
+  };
+
+  const quickRow = (label: string, slugs: string[], testId: string, extra?: React.ReactNode) =>
+    slugs.length > 0 && (
+      <div className="flex flex-wrap items-center gap-1.5" data-testid={testId}>
+        <span className="mr-1 text-xs font-bold text-slate-500">{label}</span>
+        {slugs.map((slug) => {
+          const ex = findExercise(slug);
+          if (!ex) return null;
+          const on = selected.has(slug);
+          return (
+            <button
+              key={slug}
+              type="button"
+              aria-pressed={on}
+              onClick={() => toggle(ex)}
+              className={`rounded-full px-3 py-1 text-sm font-medium transition ${on ? "bg-gold text-white" : "bg-navy-50 text-navy-800 ring-1 ring-navy-100 hover:ring-navy-700"}`}
+            >
+              {on ? "✓ " : "＋ "}
+              {ex.title}
+            </button>
+          );
+        })}
+        {extra}
+      </div>
+    );
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
@@ -31,7 +62,7 @@ export function SelfcareScreen() {
             <input
               type="search"
               className="field text-lg"
-              placeholder="キーワードで探す（例: 肩 ストレッチ、胸椎、猫背）"
+              placeholder="キーワードで探す（例: 胸のストレッチ、大胸筋、太もも裏、あご引き）"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               aria-label="キーワード検索"
@@ -43,7 +74,10 @@ export function SelfcareScreen() {
               <Button size="sm" variant={mode === "part" ? "primary" : "ghost"} onClick={() => setMode("part")}>
                 部位別
               </Button>
-              {(symptom || part || keyword) && (
+              <Button size="sm" variant={onlyFav ? "primary" : "ghost"} onClick={() => setOnlyFav(!onlyFav)} aria-pressed={onlyFav}>
+                ★ お気に入りのみ
+              </Button>
+              {(symptom || part || keyword || onlyFav) && (
                 <Button
                   size="sm"
                   variant="ghost"
@@ -52,6 +86,7 @@ export function SelfcareScreen() {
                     setSymptom(null);
                     setPart(null);
                     setKeyword("");
+                    setOnlyFav(false);
                   }}
                 >
                   条件をクリア
@@ -71,6 +106,20 @@ export function SelfcareScreen() {
                     </Chip>
                   ))}
             </div>
+            {(prefs.favorites.length > 0 || prefs.recent.length > 0) && (
+              <div className="space-y-2 border-t border-navy-100 pt-3">
+                {quickRow("★ お気に入り", prefs.favorites, "fav-row")}
+                {quickRow(
+                  "最近使った",
+                  prefs.recent,
+                  "recent-row",
+                  <button type="button" className="ml-1 text-xs text-slate-400 underline hover:text-navy-700" onClick={clearRecent}>
+                    履歴を消す
+                  </button>,
+                )}
+                <p className="text-[11px] text-slate-400">お気に入り・最近使った運動は、この端末のブラウザに運動の種類だけを保存します（患者さんの情報は保存しません）。</p>
+              </div>
+            )}
           </div>
         </Card>
 
@@ -85,8 +134,9 @@ export function SelfcareScreen() {
         <ul className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
           {results.map((ex) => {
             const on = selected.has(ex.slug);
+            const fav = favorites.has(ex.slug);
             return (
-              <li key={ex.slug}>
+              <li key={ex.slug} className="relative">
                 <button
                   type="button"
                   onClick={() => toggle(ex)}
@@ -101,7 +151,10 @@ export function SelfcareScreen() {
                     <NoImage className="h-24 w-24 shrink-0 rounded-xl" />
                   )}
                   <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="font-bold leading-snug">{ex.title}</span>
+                    <span className="pr-7 font-bold leading-snug">{ex.title}</span>
+                    {ex.bodyPart.length > 0 && (
+                      <span className="mt-0.5 text-[11px] text-slate-400">部位：{ex.bodyPart.map((b) => b.name ?? b.slug).join("・")}</span>
+                    )}
                     <span className="mt-1 line-clamp-2 text-xs text-slate-500">{ex.purpose ?? ""}</span>
                     <span className="mt-auto flex items-center justify-between pt-2">
                       <span className="text-xs text-slate-400">{ex.duration ?? "所要時間 未設定"}</span>
@@ -114,6 +167,16 @@ export function SelfcareScreen() {
                       </span>
                     </span>
                   </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleFavorite(ex.slug)}
+                  aria-pressed={fav}
+                  aria-label={fav ? `${ex.title} をお気に入りから外す` : `${ex.title} をお気に入りに追加`}
+                  title={fav ? "お気に入りから外す" : "お気に入りに追加"}
+                  className={`absolute right-2 top-2 rounded-full px-1.5 text-lg leading-none ${fav ? "text-gold" : "text-slate-300 hover:text-gold"}`}
+                >
+                  {fav ? "★" : "☆"}
                 </button>
               </li>
             );
@@ -154,6 +217,26 @@ export function SelfcareScreen() {
                         value={sel.dosage}
                         onChange={(e) => dispatch({ type: "updateSelection", slug: sel.slug, patch: { dosage: e.target.value } })}
                         placeholder="例: 左右20秒×2回／1日2セット"
+                      />
+                    </label>
+                    <div className="mt-2 rounded-lg bg-white px-3 py-2 text-xs leading-relaxed text-slate-700" data-testid={`purpose-${sel.slug}`}>
+                      <p>
+                        <span className="font-bold text-navy-800">どこを動かす運動か：</span>
+                        {ex.bodyPart.length ? ex.bodyPart.map((b) => b.name ?? b.slug).join("・") : "ライブラリに記載なし"}
+                      </p>
+                      <p className="mt-1">
+                        <span className="font-bold text-sec-blue">目的（ライブラリ）：</span>
+                        {ex.purpose ?? "ライブラリに目的の記載がありません。必要なら下に追記してください（自動では作りません）。"}
+                      </p>
+                    </div>
+                    <label className="mt-2 block text-xs font-semibold text-slate-600">
+                      目的を追記・言い換え（任意。入力すると資料ではこちらを表示）
+                      <input
+                        className="field mt-1 py-2 text-sm"
+                        value={sel.purposeNote}
+                        onChange={(e) => dispatch({ type: "updateSelection", slug: sel.slug, patch: { purposeNote: e.target.value } })}
+                        placeholder="例: 胸の前側をゆっくり伸ばし、肩を動かしやすくするための運動です"
+                        aria-label={`${ex.title} の目的の追記`}
                       />
                     </label>
                     <label className="mt-2 block text-xs font-semibold text-slate-600">
@@ -198,11 +281,11 @@ export function SelfcareScreen() {
             </div>
           )}
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
-            <Button variant="primary" size="lg" onClick={() => setTab("input")}>
-              カルテ入力に戻る
+            <Button size="lg" onClick={() => setTab("karte")}>
+              ← カルテ確認へ戻る
             </Button>
-            <Button size="lg" onClick={() => setTab("document")}>
-              患者資料を見る
+            <Button variant="primary" size="lg" onClick={() => setTab("document")}>
+              次へ：患者説明資料・PDF →
             </Button>
           </div>
         </Card>

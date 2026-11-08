@@ -90,6 +90,8 @@ export type Session = {
   confirmations: string[];
   /** 施術者による確認・承認の状態 */
   review: Review;
+  /** 仕上げの作業（工程表示用） */
+  output: { karteCopied: boolean; pdfPrinted: boolean };
 };
 
 const today = () => {
@@ -107,6 +109,7 @@ export const emptySession = (): Session => ({
   patientDoc: emptyPatientDoc(),
   confirmations: [],
   review: emptyReview(),
+  output: { karteCopied: false, pdfPrinted: false },
 });
 
 export type SessionAction =
@@ -126,7 +129,8 @@ export type SessionAction =
   /** AIの出力を「その時点の最新の状態」に反映する（生成中に編集された内容を失わないため） */
   | { type: "applyAI"; output: AIOutput; parts?: AIPart[] }
   | { type: "approveCheck"; id: string; approved: boolean }
-  | { type: "setConfirmed"; part: "karte" | "doc"; value: boolean };
+  | { type: "setConfirmed"; part: "karte" | "doc"; value: boolean }
+  | { type: "markOutput"; kind: "karteCopied" | "pdfPrinted" };
 
 export function sessionReducer(state: Session, action: SessionAction): Session {
   switch (action.type) {
@@ -197,6 +201,8 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
         : state.review.approved.filter((x) => x !== action.id);
       return { ...state, review: { ...state.review, approved } };
     }
+    case "markOutput":
+      return { ...state, output: { ...state.output, [action.kind]: true } };
     case "setConfirmed":
       return {
         ...state,

@@ -37,6 +37,7 @@ HOPE 仕事終わりも肩を気にせず過ごしたい。趣味のヨガを再
   patientDoc: emptyPatientDoc(),
   confirmations: [],
   review: emptyReview(),
+  output: { karteCopied: false, pdfPrinted: false },
 };
 
 /** 上のメモをAIに渡したときの返答例（架空）。取り込み機能のテスト・デモ用 */
