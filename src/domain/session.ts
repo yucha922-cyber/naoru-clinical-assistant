@@ -13,33 +13,50 @@ export type SelectedExercise = {
   dosage: string;
   /** 患者さんへのひとこと（施術者が編集。AI取り込みで空欄のときだけ補完） */
   note: string;
+  /**
+   * 運動の目的（施術者の追記）。空欄ならセルフケアライブラリの「目的」を使う。
+   * ライブラリに目的が無い場合も、AIが自動で作ることはしない。
+   */
+  purposeNote: string;
 };
+
+/** 今日確認できた変化（施術前 → 施術後）。メモに記録がある場合だけ */
+export type ChangeItem = { item: string; before: string; after: string };
 
 export type MindItem = { icon: MindIcon; text: string };
 
-/** 患者説明資料（1枚にまとめるため、文章ではなく短い箇条書きで持つ） */
+/** 患者説明資料（文章ではなく短い箇条書きで持つ） */
 export type PatientDoc = {
-  /** 目標（HOPEをもとにした短いひとこと） */
+  /** あなたの目標（本人の HOPE。本人が述べていない目標は作らない。空欄なら「未確認」） */
   goal: string;
-  /** ① 今のお身体の状態（1行1項目・3項目まで推奨） */
+  /** 今のお身体の状態（1行1項目・3項目まで） */
   currentPoints: string;
-  /** ② 理想のお身体の状態（1行1項目・3項目まで推奨） */
+  /** 今日確認できた変化（施術前 → 施術後） */
+  changes: ChangeItem[];
+  /** これから目指すお身体の状態（1行1項目・3項目まで） */
   idealPoints: string;
   /** 姿勢イラスト（未選択なら null） */
   posture: PostureKey | null;
   /** イラストに印を付ける部位 */
   focusAreas: BodyArea[];
-  /** ③ 意識していくこと */
+  /** 日常生活で意識すること */
   mindItems: MindItem[];
+  /** 次回来院までの目標 */
+  nextGoal: string;
+  /** 次回確認すること（次回の評価項目を短く） */
+  nextCheck: string;
 };
 
 export const emptyPatientDoc = (): PatientDoc => ({
   goal: "",
   currentPoints: "",
+  changes: [],
   idealPoints: "",
   posture: null,
   focusAreas: [],
   mindItems: [],
+  nextGoal: "",
+  nextCheck: "",
 });
 
 export type SessionMeta = {
@@ -112,7 +129,7 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
         ...state,
         selections: exists
           ? state.selections.filter((s) => s.slug !== action.slug)
-          : [...state.selections, { slug: action.slug, dosage: action.defaultDosage, note: "" }],
+          : [...state.selections, { slug: action.slug, dosage: action.defaultDosage, note: "", purposeNote: "" }],
       };
     }
     case "updateSelection":

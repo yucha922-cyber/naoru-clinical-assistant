@@ -20,7 +20,7 @@ describe("parseStepOutput（サイト内AIの各ステップの出力）", () =>
     if (!r.ok) return;
     const imported = parseAIResponse(r.text, slugs);
     expect(imported.ok).toBe(true);
-    if (imported.ok) expect(imported.value.patient.goal).toBe("仕事のあとも肩を気にせず過ごす");
+    if (imported.ok) expect(imported.value.patient.goal).toBe("仕事終わりも肩を気にせず過ごしたい");
   });
   it("コードブロックや前後の文字があっても読める", () => {
     expect(parseStepOutput("はい。\n```json\n" + karteJson + "\n```", "karte").ok).toBe(true);

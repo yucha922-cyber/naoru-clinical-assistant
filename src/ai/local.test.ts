@@ -91,9 +91,12 @@ describe("A: サイト内AI用の短い指示文（患者資料・カルテの2�
   });
 
   it("患者資料用: 院の資料ルールと選択済みセルフケア・メモを含み、氏名は含まない", () => {
-    expect(patient).toContain("専門用語は使わない");
+    expect(patient).toContain("専門用語は使わず、意味は変えない");
     expect(patient).toContain("原因を断定しない");
-    expect(patient).toContain("新しい運動は書かない");
+    expect(patient).toContain("新しい運動・目的を作らない");
+    expect(patient).toContain("無い数値は作らない");
+    expect(patient).toContain("「姿勢改善」など抽象的な目標は作らない");
+    expect(patient).toContain("特定の姿勢を強制しない");
     expect(patient).toContain("kata-chest-stretch=胸筋ストレッチ");
     expect(patient).toContain("頸椎回旋 右45度");
     expect(patient).toContain("side-forward-head");
@@ -102,7 +105,7 @@ describe("A: サイト内AI用の短い指示文（患者資料・カルテの2�
 
   it("カルテ用: 臨床記載のルール・全21項目・メモを含み、氏名は含まない", () => {
     expect(karte).toContain("メモに無い検査・施術・数値を足さない");
-    expect(karte).toContain("主観（本人の申告）・客観（検査・観察）・仮説を分ける");
+    expect(karte).toContain("主観（本人の申告:主訴・現病歴・HOPE）・客観（検査・観察で確認した事実）・仮説（考察。「〜の可能性」）・今後の介入提案（次回の評価・目標）を分ける");
     expect(karte).toContain("施術直後の効果と長期的な改善を分ける");
     expect(karte).toContain("dropoutReason=離反理由");
     expect(karte).toContain("胸筋ストレッチ（左右20秒×2回／1日2セット）");
@@ -124,7 +127,7 @@ describe("B: 患者資料 → カルテ の順に反映", () => {
     if (!r.ok) throw new Error();
     const before = { ...SAMPLE_SESSION, confirmations: ["前回の確認事項"] };
     const s1 = sessionReducer(before, { type: "applyAI", output: r.value, parts: ["patient"] });
-    expect(s1.patientDoc.goal).toBe("仕事のあとも肩を気にせず過ごす");
+    expect(s1.patientDoc.goal).toBe("仕事終わりも肩を気にせず過ごしたい");
     expect(s1.pendingExercises).toEqual(["壁を使ったドリル"]);
     expect(s1.karte.chiefComplaint).toBe("");
     expect(s1.confirmations).toEqual(["前回の確認事項"]);

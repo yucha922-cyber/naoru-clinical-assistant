@@ -5,7 +5,7 @@ import { BODY_AREA_KEYS, MIND_ICON_KEYS, POSTURE_KEYS, guessMindIcon } from "../
 // AI（ChatGPT / Claude など）に出力してもらう JSON の形。
 // 文字列の代わりに配列が返ってきた場合は改行でつなげて受け付ける（よくある揺れの吸収）。
 
-export const AI_SCHEMA_VERSION = "2.0";
+export const AI_SCHEMA_VERSION = "3.0";
 
 const text = z.preprocess(
   (v) => (Array.isArray(v) ? v.filter((x) => typeof x === "string").join("\n") : v === null ? "" : v),
@@ -66,7 +66,18 @@ export const aiOutputSchema = z.object({
     goal: text.optional().default(""),
     /** ① 今のお身体の状態（箇条書き） */
     currentPoints: textList,
-    /** ② 理想のお身体の状態（箇条書き） */
+    /** 今日確認できた変化（施術前→施術後）。メモに記録がある場合だけ。前後どちらかが空のものは取り込まない */
+    changes: z
+      .preprocess(
+        (x) =>
+          Array.isArray(x)
+            ? x.filter((c) => c && typeof c === "object" && String((c as { before?: unknown }).before ?? "").trim() && String((c as { after?: unknown }).after ?? "").trim())
+            : [],
+        z.array(z.object({ item: text.optional().default(""), before: text, after: text })),
+      )
+      .optional()
+      .default([]),
+    /** これから目指すお身体の状態（箇条書き） */
     idealPoints: textList,
     /** 姿勢イラストの種類。不明・該当なしは null */
     posture: z.preprocess((x) => ((POSTURE_KEYS as string[]).includes(x as string) ? x : null), z.enum(POSTURE_KEYS).nullable()).optional().default(null),
@@ -77,6 +88,10 @@ export const aiOutputSchema = z.object({
       .default([]),
     /** ③ 意識していくこと（アイコン＋ひとこと） */
     pointsToMind: z.preprocess((x) => (x === undefined || x === null ? [] : typeof x === "string" ? toSentences(x) : x), z.array(mindItem)),
+    /** 次回来院までの目標 */
+    nextGoal: text.optional().default(""),
+    /** 次回確認すること */
+    nextCheck: text.optional().default(""),
     selfcare: z
       .array(
         z.object({
