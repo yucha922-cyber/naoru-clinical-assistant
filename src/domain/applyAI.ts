@@ -53,10 +53,15 @@ export function applyAIOutput(session: Session, out: AIOutput, parts: AIPart[] =
     patientDoc: {
       goal: keep(p.goal, prev.goal),
       currentPoints: keep(lines(p.currentPoints), prev.currentPoints),
+      changes: p.changes.length
+        ? p.changes.map((c) => ({ item: c.item.trim(), before: c.before.trim(), after: c.after.trim() }))
+        : prev.changes,
       idealPoints: keep(lines(p.idealPoints), prev.idealPoints),
       posture: p.posture ?? prev.posture,
       focusAreas: p.focusAreas.length ? p.focusAreas : prev.focusAreas,
       mindItems: p.pointsToMind.filter((m) => m.text).length ? p.pointsToMind.filter((m) => m.text) : prev.mindItems,
+      nextGoal: keep(p.nextGoal, prev.nextGoal),
+      nextCheck: keep(p.nextCheck, prev.nextCheck),
     },
     confirmations: doKarte ? out.confirmations : session.confirmations,
   };

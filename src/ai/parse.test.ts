@@ -119,6 +119,63 @@ describe("患者資料（schemaVersion 2.0）", () => {
   });
 });
 
+describe("患者資料 v3（今日確認できた変化・次回来院までの目標）", () => {
+  it("架空サンプルの変化・次回の目標を取り込む", () => {
+    const r = parseAIResponse(SAMPLE_AI_RESPONSE, selected);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.patient.changes).toEqual([
+      { item: "首を右に向ける動き", before: "45°", after: "55°" },
+      { item: "首から肩の張り（10段階）", before: "10", after: "4" },
+    ]);
+    expect(r.value.patient.nextGoal).toContain("無理のない範囲で続け");
+    expect(r.value.patient.nextCheck).toContain("首を回す動き");
+  });
+
+  it("施術前・施術後のどちらかが空の変化は取り込まない（推測で埋めない）", () => {
+    const r = parseAIResponse(
+      JSON.stringify({
+        karte: {},
+        patient: {
+          currentPoints: ["a"],
+          idealPoints: ["b"],
+          pointsToMind: [],
+          changes: [
+            { item: "首を右に向ける動き", before: "45°", after: "" },
+            { item: "張り", before: "", after: "4" },
+            { item: "前屈", before: "床まで20cm", after: "床まで10cm" },
+          ],
+        },
+      }),
+      selected,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value.patient.changes).toEqual([{ item: "前屈", before: "床まで20cm", after: "床まで10cm" }]);
+  });
+
+  it("v2 形式（changes / nextGoal なし）も取り込める", () => {
+    const r = parseAIResponse(JSON.stringify({ karte: {}, patient: { goal: "g", currentPoints: ["a"], idealPoints: ["b"], pointsToMind: [] } }), selected);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.value.patient.changes).toEqual([]);
+      expect(r.value.patient.nextGoal).toBe("");
+    }
+  });
+
+  it("反映すると資料に変化・次回の目標が入り、AIが空欄のときは施術者の入力を残す", () => {
+    const r = parseAIResponse(SAMPLE_AI_RESPONSE, selected);
+    if (!r.ok) throw new Error();
+    const after = applyAIOutput(SAMPLE_SESSION, r.value);
+    expect(after.patientDoc.changes).toHaveLength(2);
+    expect(after.patientDoc.nextGoal).toContain("無理のない範囲");
+    const empty = parseAIResponse(JSON.stringify({ karte: {}, patient: { currentPoints: [], idealPoints: [], pointsToMind: [] } }), selected);
+    if (!empty.ok) throw new Error();
+    const kept = applyAIOutput(after, empty.value);
+    expect(kept.patientDoc.changes).toHaveLength(2);
+    expect(kept.patientDoc.nextGoal).toBe(after.patientDoc.nextGoal);
+  });
+});
+
 describe("extractJson", () => {
   it("前後の説明文を除く", () => {
     expect(extractJson('はい。{"a":1} 以上です')).toBe('{"a":1}');
@@ -139,8 +196,8 @@ describe("applyAIOutput", () => {
     expect(after.selections[1].note).toContain("首の後ろ");
     expect(after.patientDoc.posture).toBe("side-forward-head");
     expect(after.patientDoc.focusAreas).toEqual(["neck", "shoulder"]);
-    expect(after.patientDoc.mindItems[0]).toEqual({ icon: "break", text: "1時間に1回は肩を回して小休憩" });
-    expect(after.patientDoc.goal).toBe("仕事のあとも肩を気にせず過ごす");
+    expect(after.patientDoc.mindItems[0]).toEqual({ icon: "break", text: "30〜60分を目安に一度立ち上がる" });
+    expect(after.patientDoc.goal).toBe("仕事終わりも肩を気にせず過ごしたい");
     expect(after.selections.map((s) => s.slug)).toEqual(selected); // 種目は増減しない
     expect(after.pendingExercises).toEqual(["壁を使ったドリル"]);
     expect(after.confirmations.length).toBeGreaterThan(0);

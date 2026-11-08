@@ -28,9 +28,9 @@ HOPE 仕事終わりも肩を気にせず過ごしたい。趣味のヨガを再
 プラン 週1回×4回で集中、その後2週に1回。
 仕事 繁忙期で残業多め。`,
   selections: [
-    { slug: "kata-chest-stretch", dosage: "左右20秒×2回／1日2セット", note: "" },
-    { slug: "kubi-chin-tuck", dosage: "10回／仕事の合間に", note: "" },
-    { slug: "kubi-thoracic-extension", dosage: "10回／お風呂上がり", note: "" },
+    { slug: "kata-chest-stretch", dosage: "左右20秒×2回／1日2セット", note: "", purposeNote: "" },
+    { slug: "kubi-chin-tuck", dosage: "10回／仕事の合間に", note: "", purposeNote: "" },
+    { slug: "kubi-thoracic-extension", dosage: "10回／お風呂上がり", note: "", purposeNote: "" },
   ],
   pendingExercises: [],
   karte: emptyKarte(),
@@ -43,7 +43,7 @@ export const SAMPLE_AI_RESPONSE = `以下が整理結果です。
 
 \`\`\`json
 {
-  "schemaVersion": "2.0",
+  "schemaVersion": "3.0",
   "karte": {
     "planFrequency": "週1回×4回（集中期）→ 以降2週に1回",
     "chiefComplaint": "右頸部〜肩部の張り感（夕方に増悪）。発症3か月前。",
@@ -68,29 +68,35 @@ export const SAMPLE_AI_RESPONSE = `以下が整理結果です。
     "dropoutReason": ""
   },
   "patient": {
-    "goal": "仕事のあとも肩を気にせず過ごす",
+    "goal": "仕事終わりも肩を気にせず過ごしたい",
     "currentPoints": [
-      "頭が少し前に出た姿勢になりやすい",
-      "右の首から肩に負担がかかりやすい",
-      "首を右に回しにくい"
+      "首を右に向ける動きに制限がみられました",
+      "頭が前に出た姿勢の傾向がみられました",
+      "右の首の前側に、押すと痛む部分がありました"
+    ],
+    "changes": [
+      { "item": "首を右に向ける動き", "before": "45°", "after": "55°" },
+      { "item": "首から肩の張り（10段階）", "before": "10", "after": "4" }
     ],
     "idealPoints": [
-      "頭が背骨の上にのった楽な姿勢",
-      "夕方でも首・肩が軽い",
-      "左右どちらにも楽に首が回る"
+      "仕事終わりも首や肩を楽に動かせる",
+      "夕方になっても肩の張りが気になりにくい",
+      "趣味のヨガを再開できる"
     ],
     "posture": "side-forward-head",
     "focusAreas": ["neck", "shoulder"],
     "pointsToMind": [
-      { "icon": "break", "text": "1時間に1回は肩を回して小休憩" },
-      { "icon": "desk", "text": "画面は目の高さに。あごを前に出さない" },
-      { "icon": "breath", "text": "お昼休みにもセルフケアを" }
+      { "icon": "break", "text": "30〜60分を目安に一度立ち上がる" },
+      { "icon": "desk", "text": "画面の高さを目線に近づける" },
+      { "icon": "breath", "text": "夕方につらくなる前に、セルフケアで体をほぐす" }
     ],
     "selfcare": [
       { "slug": "kata-chest-stretch", "point": "胸の前が気持ちよく伸びる強さで" },
       { "slug": "kubi-chin-tuck", "point": "首の後ろが伸びるのを感じて" },
       { "slug": "kubi-thoracic-extension", "point": "腰ではなく背中の上を反らす" }
-    ]
+    ],
+    "nextGoal": "3つのセルフケアを無理のない範囲で続け、仕事終わりの肩の状態を確かめましょう。",
+    "nextCheck": "首を回す動きと肩の位置をもう一度確認します"
   },
   "unresolvedExercises": ["壁を使ったドリル"],
   "confirmations": [

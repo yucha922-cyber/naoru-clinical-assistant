@@ -10,7 +10,7 @@
 //   未指定なら公開サイト（GitHub Pages）から実際に読み込みます。
 // - 成果物（スクリーンショット・PDF）は artifacts/ に出力します（.gitignore 済み）。
 
-import { spawn } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
@@ -39,6 +39,84 @@ const check = (name, ok, detail = "") => {
   results.push({ name, ok, detail });
   console.log(`${ok ? "✔" : "✘"} ${name}${detail ? ` — ${detail}` : ""}`);
 };
+
+/** PDF の各ページの文字（空白を除く）。運動カードがページの途中で分かれていないかの確認に使う */
+function pdfPageTexts(file) {
+  const out = [];
+  for (let i = 1; i <= 20; i++) {
+    let t;
+    try {
+      t = execFileSync("pdftotext", ["-f", String(i), "-l", String(i), "-enc", "UTF-8", file, "-"], { encoding: "utf-8" });
+    } catch {
+      break;
+    }
+    if (!t.trim() && i > 1) break;
+    out.push(t.replace(/\s+/g, ""));
+  }
+  return out;
+}
+
+/** 運動カードごとに「運動名」と「最後の注意事項」が同じページにあるか（＝カードが分断されていないか） */
+function cardsNotSplit(pages, cards) {
+  return cards.map((c) => {
+    const tail = c.lastCaution.replace(/\s+/g, "").slice(-12);
+    // 同じ注意文が別の運動にもあるため、「運動名のあるページ」に注意文があるかで判定する
+    const titlePage = pages.findIndex((p) => p.includes(c.title.replace(/\s+/g, "")));
+    return { title: c.title, titlePage, ok: titlePage >= 0 && pages[titlePage].includes(tail) };
+  });
+}
+
+/** 資料内の文字サイズ（px）・QRコードの大きさ（mm）・カードの配置 */
+async function docMetrics(page) {
+  return page.evaluate(() => {
+    const sheet = document.querySelector('[data-testid="a4-sheet"]');
+    const mmPerPx = 210 / sheet.getBoundingClientRect().width;
+    const sizes = [];
+    const walker = document.createTreeWalker(document.querySelector("#doc-content"), NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const n = walker.currentNode;
+      if (!n.textContent.trim()) continue;
+      const el = n.parentElement;
+      if (el.closest("svg")) continue;
+      sizes.push({ px: parseFloat(getComputedStyle(el).fontSize), text: n.textContent.trim().slice(0, 12) });
+    }
+    const min = sizes.reduce((a, b) => (b.px < a.px ? b : a), { px: 99, text: "" });
+    const qr = Array.from(document.querySelectorAll("#print-root img[data-qr]")).map((i) => +(i.getBoundingClientRect().width * mmPerPx).toFixed(1));
+    const cards = Array.from(document.querySelectorAll("[data-doc-exercise]")).map((c) => {
+      const r = c.getBoundingClientRect();
+      return { slug: c.getAttribute("data-doc-exercise"), layout: c.getAttribute("data-layout"), wMm: +(r.width * mmPerPx).toFixed(1), top: Math.round(r.top) };
+    });
+    const content = document.querySelector("#doc-content").getBoundingClientRect();
+    return {
+      minFontPt: +(min.px * 0.75).toFixed(1),
+      minFontText: min.text,
+      qrMm: qr,
+      cards,
+      contentWmm: +(content.width * mmPerPx).toFixed(1),
+      zoomStyle: document.querySelector("#doc-content").style.zoom || "",
+      sections: Array.from(document.querySelectorAll("[data-doc-section]")).map((e) => e.getAttribute("data-doc-section")),
+    };
+  });
+}
+
+async function printPdf(page, file) {
+  await page.evaluate(async () => {
+    const imgs = Array.from(document.querySelectorAll("#print-root img"));
+    await Promise.all(imgs.map((i) => (i.complete ? null : new Promise((r) => { i.onload = i.onerror = r; }))));
+  });
+  await page.emulateMedia({ media: "print" });
+  const buf = await page.pdf({ path: file, format: "A4", printBackground: true, preferCSSPageSize: true });
+  await page.emulateMedia({ media: "screen" });
+  return { pages: (buf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? []).length, file };
+}
+
+/** 選択中の運動の「運動名」と「最後の注意事項」（ライブラリのデータから） */
+const SELFCARE_DATA = JSON.parse(fs.readFileSync(path.join(ROOT, "src", "data", "selfcare.json"), "utf-8"));
+const cardInfo = (slugs) =>
+  slugs.map((slug) => {
+    const e = SELFCARE_DATA.exercises.find((x) => x.slug === slug);
+    return { title: e.title, lastCaution: e.precautions.at(-1) ?? e.title };
+  });
 
 if (!fs.existsSync(path.join(ROOT, "dist", "index.html"))) {
   console.error("dist/ がありません。先に npm run build を実行してください。");
@@ -162,28 +240,37 @@ try {
   check("AIの返答（架空）を取り込める", await page.getByText("取り込みました", { exact: true }).isVisible());
   check("特定できない運動が確認待ちになる", await page.getByText("壁を使ったドリル").first().isVisible());
 
-  // 3種目（サンプル）の資料が A4 1枚に収まり、イラスト・アイコンが入ること
+  // 3種目（サンプル）の資料: 新しい構成・イラスト・アイコン・文字サイズ・QR・ページ分割
   await page.getByRole("button", { name: /患者説明資料/ }).click();
   await page.getByTestId("page-count").waitFor();
-  const pageCountText = await page.getByTestId("page-count").innerText();
+  await page.waitForTimeout(500);
   const figures = await page.locator("#print-root svg[data-posture]").evaluateAll((els) => els.map((e) => e.getAttribute("data-posture")));
   const focusMarks = await page.locator("#print-root svg[data-posture] [data-focus] circle").count();
   const mindIcons = await page.locator("#print-root [data-mind-icon]").evaluateAll((els) => els.map((e) => e.getAttribute("data-mind-icon")));
   check(
-    "資料に今・理想の姿勢イラスト、気になる部位の印、③のアイコンが入る",
+    "資料に今・目指す姿勢のイラスト、気になる部位の印、生活のアイコンが入る",
     figures.join() === "side-forward-head,side-neutral" && focusMarks > 0 && mindIcons.join() === "break,desk,breath",
     `${figures.join(" → ")} / 印${focusMarks / 2}か所 / ${mindIcons.join(",")}`,
   );
-  check("目標が表示される", (await page.locator("[data-doc-goal]").innerText()).includes("仕事のあとも肩を気にせず過ごす"));
-  await page.evaluate(async () => {
-    const imgs = Array.from(document.querySelectorAll("#print-root img"));
-    await Promise.all(imgs.map((i) => (i.complete ? null : new Promise((r) => { i.onload = i.onerror = r; }))));
-  });
-  await page.emulateMedia({ media: "print" });
-  const onePdf = await page.pdf({ path: path.join(OUT, "patient-document-3items.pdf"), format: "A4", printBackground: true, preferCSSPageSize: true });
-  await page.emulateMedia({ media: "screen" });
-  const onePages = (onePdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? []).length;
-  check("セルフケア3種目の資料が A4 1枚に収まる", onePages === 1 && pageCountText.includes("1枚"), `PDF ${onePages}ページ / 画面表示「${pageCountText}」`);
+  check("あなたの目標（本人のHOPE）が表示される", (await page.locator("[data-doc-goal]").innerText()).includes("仕事終わりも肩を気にせず過ごしたい"));
+  const docText3 = await page.getByTestId("a4-sheet").innerText();
+  const newSections = ["あなたの目標", "今のお身体の状態", "今日確認できた変化", "これから目指すお身体の状態", "日常生活で意識すること", "今日のセルフケア", "次回来院までの目標"];
+  check("新しい構成（7項目）がすべて表示される", newSections.every((t) => docText3.includes(t)), newSections.filter((t) => !docText3.includes(t)).join(",") || "OK");
+  check("今日確認できた変化に、メモの実測値（45°→55°、10→4）が表示される", /首を右に向ける動き[\s\S]*45°[\s\S]*55°/.test(docText3) && /施術直後の変化です/.test(docText3));
+  check("運動の目的（ライブラリの説明）が表示される", (await page.locator("#print-root [data-doc-purpose]").count()) === 3);
+  const m3 = await docMetrics(page);
+  check("文字が小さくなりすぎていない（最小8pt以上・全体の縮小なし）", m3.minFontPt >= 8 && m3.zoomStyle === "", `最小 ${m3.minFontPt}pt「${m3.minFontText}」`);
+  check("QRコードが印刷で読み取れる大きさ（20mm以上）", m3.qrMm.length === 3 && m3.qrMm.every((q) => q >= 20), m3.qrMm.join("mm, ") + "mm");
+  check("セルフケア3種目は2列のカードで表示", m3.cards.every((c) => c.layout === "card") && m3.cards[0].top === m3.cards[1].top && m3.cards[2].top > m3.cards[0].top, m3.cards.map((c) => `${c.wMm}mm`).join(" / "));
+  const pageCount3 = await page.getByTestId("page-count").innerText();
+  const pdf3 = await printPdf(page, path.join(OUT, "patient-document-3items.pdf"));
+  check("画面に表示するページ数が実際の PDF と一致する（3種目）", pageCount3.includes(pdf3.pages === 1 ? "1枚" : `${pdf3.pages} ページ`), `画面「${pageCount3}」/ PDF ${pdf3.pages}ページ`);
+  const split3 = cardsNotSplit(pdfPageTexts(pdf3.file), cardInfo(["kata-chest-stretch", "kubi-chin-tuck", "kubi-thoracic-extension"]));
+  check(
+    "3種目の PDF: 運動カードがページの途中で分かれない（2ページまで）",
+    pdf3.pages <= 2 && split3.every((c) => c.ok),
+    `${pdf3.pages}ページ / ${split3.map((c) => `${c.title}:p${c.titlePage + 1}`).join(", ")}`,
+  );
   await page.getByRole("button", { name: /カルテ入力/ }).click();
 
   // カルテ
@@ -224,7 +311,7 @@ try {
     await Promise.all(imgs.map((i) => (i.complete ? null : new Promise((r) => { i.onload = i.onerror = r; }))));
   });
   const sheetText = await sheet.innerText();
-  check("資料に4セクションが表示される", ["今のお身体の状態", "理想のお身体の状態", "意識していくこと", "今日のセルフケア"].every((t) => sheetText.includes(t)));
+  check("資料の主な項目が表示される", ["今のお身体の状態", "これから目指すお身体の状態", "日常生活で意識すること", "今日のセルフケア"].every((t) => sheetText.includes(t)));
   check("資料に選択した運動だけが載る", (await page.locator("[data-doc-exercise]").count()) === 4 && !sheetText.includes("壁を使ったドリル"));
   const imgStats = await page.evaluate(() => {
     const imgs = Array.from(document.querySelectorAll("#print-root img:not([data-qr])"));
@@ -395,7 +482,7 @@ try {
   );
   await ctx4.close();
 
-  // ---------- A4 1枚に自動で収める（内容が多い場合） ----------
+  // ---------- セルフケアの種目数ごとのレイアウト・情報が無い項目・長文 ----------
   const ctx5 = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   await routeImages(ctx5);
   const p5 = await ctx5.newPage();
@@ -405,49 +492,94 @@ try {
   await p5.getByRole("tab", { name: "ChatGPT／Claudeにコピー" }).click();
   await p5.getByRole("button", { name: "返答例（架空）を貼る" }).click();
   await p5.getByRole("button", { name: "③ 取り込む" }).click();
-  await p5.getByRole("button", { name: /セルフケア選択/ }).click();
-  for (const name of ["ふくらはぎストレッチ", "ハムストリングスストレッチ", "クラムシェル"]) {
+  const toggleExercise = async (name, on) => {
+    await p5.getByRole("button", { name: /セルフケア選択/ }).click();
     await p5.getByLabel("キーワード検索").fill(name);
-    await p5.locator("[data-screen=selfcare] ul > li button[aria-pressed=false]", { hasText: name }).first().click();
+    await p5.locator(`[data-screen=selfcare] ul > li button[aria-pressed=${on ? "false" : "true"}]`, { hasText: name }).first().click();
+    await p5.getByLabel("キーワード検索").fill("");
+  };
+  const openDoc = async () => {
+    await p5.getByRole("button", { name: /患者説明資料/ }).click();
+    await p5.waitForTimeout(800);
+  };
+
+  // 1種目: 横長のカードで、空白の列が出ない
+  await toggleExercise("顎引き", false);
+  await toggleExercise("胸椎伸展", false);
+  await openDoc();
+  const m1 = await docMetrics(p5);
+  const pc1 = await p5.getByTestId("page-count").innerText();
+  const den1 = await p5.locator("#doc-content").getAttribute("data-density");
+  const pdf1 = await printPdf(p5, path.join(OUT, "patient-document-1item.pdf"));
+  check("画面に表示するページ数が実際の PDF と一致する（1種目・説明すべてあり）", pc1.includes(pdf1.pages === 1 ? "1枚" : `${pdf1.pages} ページ`), `画面「${pc1}」/ PDF ${pdf1.pages}ページ / 詰め具合 ${den1}`);
+  check(
+    "セルフケア1種目: 横長のカードで幅いっぱいに表示（空白の列なし）",
+    m1.cards.length === 1 && m1.cards[0].layout === "wide" && m1.cards[0].wMm >= m1.contentWmm - 1 && m1.qrMm[0] >= 22,
+    `カード幅 ${m1.cards[0]?.wMm}mm / 本文幅 ${m1.contentWmm}mm / QR ${m1.qrMm[0]}mm / PDF ${pdf1.pages}ページ`,
+  );
+
+  // 2種目: 2列
+  await toggleExercise("顎引き", true);
+  await openDoc();
+  const m2 = await docMetrics(p5);
+  const pdf2 = await printPdf(p5, path.join(OUT, "patient-document-2items.pdf"));
+  const split2 = cardsNotSplit(pdfPageTexts(pdf2.file), cardInfo(["kata-chest-stretch", "kubi-chin-tuck"]));
+  check(
+    "セルフケア2種目: 2列で横に並び、カードが分かれない",
+    m2.cards.length === 2 && m2.cards.every((c) => c.layout === "card") && m2.cards[0].top === m2.cards[1].top && split2.every((c) => c.ok),
+    `${m2.cards.map((c) => `${c.wMm}mm`).join(" / ")} / PDF ${pdf2.pages}ページ`,
+  );
+
+  // 情報が無い項目は表示しない（施術前後の変化・HOPE）
+  await openDoc();
+  while ((await p5.getByTestId("changes-editor").getByRole("button", { name: "削除" }).count()) > 0) {
+    await p5.getByTestId("changes-editor").getByRole("button", { name: "削除" }).first().click();
   }
-  await p5.getByRole("button", { name: /患者説明資料/ }).click();
-  // 文章を多めにし、手順の文章も載せる（最も長くなる条件）
-  await p5.getByLabel("① 今のお身体の状態").fill("頭が少し前に出た姿勢になりやすい状態です\n右の首から肩にかけて負担がかかりやすい傾向です\n首を右に回しにくく、夕方に張りが強くなります\n背中の上のほうが丸くなりやすい傾向です");
+  await p5.getByLabel(/あなたの目標/).fill("");
+  await p5.waitForTimeout(500);
+  const mEmpty = await docMetrics(p5);
+  const hopeMissing = await p5.getByTestId("hope-missing").isVisible();
+  check(
+    "情報が無い項目は資料に出さない（変化の記録なし・HOPE未確認）",
+    !mEmpty.sections.includes("changes") && (await p5.locator("[data-doc-goal]").count()) === 0 && hopeMissing,
+    `表示中: ${mEmpty.sections.join(",")} / HOPE未確認の表示=${hopeMissing}`,
+  );
+
+  // 6種目＋手順＋長文: 文字を縮小せず2ページ以上に分け、カードは途中で分かれない
+  for (const name of ["胸椎伸展", "ふくらはぎストレッチ", "ハムストリングスストレッチ", "クラムシェル"]) await toggleExercise(name, true);
+  await openDoc();
+  const longLine = "右の首から肩にかけて負担がかかりやすく、夕方になると張りが強くなり、首を右に向ける動きにも制限がみられました";
+  await p5.getByLabel("今のお身体の状態").fill(`${longLine}\n頭が前に出た姿勢の傾向がみられました\n背中の上のほうが丸くなりやすい傾向がみられました`);
   await p5.getByText("やり方（手順）の文章も載せる").click();
-  await p5.waitForTimeout(1500);
-  const fitText = await p5.getByTestId("page-count").innerText();
-  const fitNote = await p5.getByTestId("fit-note").innerText().catch(() => "");
-  const zoomAttr = await p5.locator("#doc-content").getAttribute("data-zoom");
-  await p5.evaluate(async () => {
-    const imgs = Array.from(document.querySelectorAll("#print-root img"));
-    await Promise.all(imgs.map((i) => (i.complete ? null : new Promise((r) => { i.onload = i.onerror = r; }))));
-  });
-  await p5.emulateMedia({ media: "print" });
-  const bigPdf = await p5.pdf({ path: path.join(OUT, "patient-document-6items.pdf"), format: "A4", printBackground: true, preferCSSPageSize: true });
-  await p5.emulateMedia({ media: "screen" });
-  const bigPages = (bigPdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? []).length;
-  const sheetOk = await p5.evaluate(() => {
+  await p5.waitForTimeout(1200);
+  const m6 = await docMetrics(p5);
+  const pageText6 = await p5.getByTestId("page-count").innerText();
+  const pdf6 = await printPdf(p5, path.join(OUT, "patient-document-6items.pdf"));
+  check("画面に表示するページ数が実際の PDF と一致する（6種目）", pageText6.includes(`${pdf6.pages} ページ`), `画面「${pageText6}」/ PDF ${pdf6.pages}ページ`);
+  const slugs6 = ["kata-chest-stretch", "kubi-chin-tuck", "kubi-thoracic-extension", "calf-stretch", "hamstring-stretch", "clamshell"];
+  const split6 = cardsNotSplit(pdfPageTexts(pdf6.file), cardInfo(slugs6));
+  const overflow6 = await p5.evaluate(() => {
     const s = document.querySelector('[data-testid="a4-sheet"]').getBoundingClientRect();
-    const c = document.querySelector("#doc-content").getBoundingClientRect();
-    return c.right <= s.right + 1 && c.left >= s.left - 1;
+    return Array.from(document.querySelectorAll("#doc-content *")).filter((el) => el.getBoundingClientRect().right > s.right + 1).length;
   });
   check(
-    "内容が多くても（6種目・手順あり）自動で調整して A4 1枚に収まる",
-    bigPages === 1 && fitText.includes("1枚") && sheetOk && Number(zoomAttr) >= 0.6,
-    `PDF ${bigPages}ページ / ${fitNote || fitText} / 縮小率 ${zoomAttr}`,
+    "6種目＋手順＋長文: 文字を縮小せず複数ページに分け、運動カードは途中で分かれない",
+    pdf6.pages >= 2 && split6.every((c) => c.ok) && m6.minFontPt >= 8 && m6.zoomStyle === "" && overflow6 === 0 && pageText6.includes("ページ"),
+    `PDF ${pdf6.pages}ページ / 最小 ${m6.minFontPt}pt / はみ出し ${overflow6} / ${split6.map((c) => `${c.title}:p${c.titlePage + 1}${c.ok ? "" : "✗"}`).join(", ")}`,
   );
-  // 内容を減らすと標準の大きさに戻る
+
+  // 内容を減らすと、写真の大きさが標準に戻る
   await p5.getByText("やり方（手順）の文章も載せる").click();
-  await p5.getByRole("button", { name: /セルフケア選択/ }).click();
-  for (const name of ["ふくらはぎストレッチ", "ハムストリングスストレッチ", "クラムシェル"]) {
-    await p5.getByLabel("キーワード検索").fill(name);
-    await p5.locator("[data-screen=selfcare] ul > li button[aria-pressed=true]", { hasText: name }).first().click();
-  }
-  await p5.getByRole("button", { name: /患者説明資料/ }).click();
-  await p5.getByLabel("① 今のお身体の状態").fill("頭が少し前に出た姿勢になりやすい");
-  await p5.waitForTimeout(1500);
-  const backZoom = await p5.locator("#doc-content").getAttribute("data-zoom");
-  check("内容を減らすと、縮小をやめて元の大きさに戻る", backZoom === "1.00", `縮小率 ${backZoom}`);
+  for (const name of ["胸椎伸展", "ふくらはぎストレッチ", "ハムストリングスストレッチ", "クラムシェル", "顎引き"]) await toggleExercise(name, false);
+  await openDoc();
+  await p5.getByLabel("今のお身体の状態").fill("首を右に向ける動きに制限がみられました");
+  await p5.waitForTimeout(1000);
+  const backDensity = await p5.locator("#doc-content").getAttribute("data-density");
+  const pcBack = await p5.getByTestId("page-count").innerText();
+  check("内容を減らすと、1枚に収まり、写真は必要な場合だけ小さくする", pcBack.includes("1枚") && ["0", "1"].includes(backDensity ?? ""), `「${pcBack}」/ 詰め具合 ${backDensity}`);
+  const pdf1b = await printPdf(p5, path.join(OUT, "patient-document-1item-short.pdf"));
+  const pc1b = await p5.getByTestId("page-count").innerText();
+  check("画面に表示するページ数が実際の PDF と一致する（1種目）", pc1b.includes(pdf1b.pages === 1 ? "1枚" : `${pdf1b.pages} ページ`), `画面「${pc1b}」/ PDF ${pdf1b.pages}ページ`);
   await ctx5.close();
 
   // ---------- 画面幅への対応 ----------

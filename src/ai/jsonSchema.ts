@@ -31,6 +31,16 @@ export function buildOutputJsonSchema(selectedSlugs: string[]): Record<string, u
         properties: {
           goal: str,
           currentPoints: { type: "array", items: str, maxItems: 3 },
+          changes: {
+            type: "array",
+            maxItems: 3,
+            items: {
+              type: "object",
+              properties: { item: str, before: str, after: str },
+              required: ["item", "before", "after"],
+              additionalProperties: false,
+            },
+          },
           idealPoints: { type: "array", items: str, maxItems: 3 },
           posture: { anyOf: [{ type: "string", enum: POSTURE_KEYS }, { type: "null" }] },
           focusAreas: { type: "array", items: { type: "string", enum: BODY_AREA_KEYS }, maxItems: 3 },
@@ -45,8 +55,10 @@ export function buildOutputJsonSchema(selectedSlugs: string[]): Record<string, u
             },
           },
           selfcare: { type: "array", items: selfcareItem, maxItems: selectedSlugs.length },
+          nextGoal: str,
+          nextCheck: str,
         },
-        required: ["goal", "currentPoints", "idealPoints", "posture", "focusAreas", "pointsToMind", "selfcare"],
+        required: ["goal", "currentPoints", "changes", "idealPoints", "posture", "focusAreas", "pointsToMind", "selfcare", "nextGoal", "nextCheck"],
         additionalProperties: false,
       },
       unresolvedExercises: strList,
