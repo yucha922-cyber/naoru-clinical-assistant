@@ -4,11 +4,14 @@ import { KARTE_FIELDS, formatKarte, isKarteEmpty } from "../domain/karte";
 import { findExercise } from "../data/selfcare";
 import { Button, Card, CardTitle, Notice } from "../components/ui";
 import { copyText } from "../lib/clipboard";
+import { ClinicalReview } from "../components/ClinicalReview";
+import { KARTE_CATEGORY, CATEGORY_STYLE } from "../domain/karteCategory";
 
 const rowsFor = (text: string) => Math.min(14, Math.max(2, text.split("\n").length + Math.floor(text.length / 60)));
 
 export function KarteScreen() {
   const { session, dispatch, notify } = useApp();
+  const [memoOpen, setMemoOpen] = useState(true);
   const [showAll, setShowAll] = useState(true);
   const karte = session.karte;
   const output = formatKarte(karte);
@@ -26,6 +29,11 @@ export function KarteScreen() {
       notify("カルテが空です");
       return;
     }
+    if (
+      !session.review.karteConfirmed &&
+      !window.confirm("カルテの内容の確認（右の「内容の確認」）がまだ済んでいません。このままコピーしますか？")
+    )
+      return;
     notify((await copyText(output)) ? "カルテをコピーしました。SalonOne に貼り付けてください" : "コピーできませんでした");
   };
 
@@ -58,7 +66,14 @@ export function KarteScreen() {
         <div className="space-y-4">
           {fields.map((f) => (
             <label key={f.key} className="block">
-              <span className="text-sm font-bold text-navy-800">【{f.label}】</span>
+              <span className="flex items-center gap-2">
+                <span className="text-sm font-bold text-navy-800">【{f.label}】</span>
+                {KARTE_CATEGORY[f.key] && (
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${CATEGORY_STYLE[KARTE_CATEGORY[f.key]!].className}`} title={CATEGORY_STYLE[KARTE_CATEGORY[f.key]!].hint}>
+                    {CATEGORY_STYLE[KARTE_CATEGORY[f.key]!].label}
+                  </span>
+                )}
+              </span>
               <textarea
                 className="field mt-1 text-[15px] leading-relaxed"
                 rows={rowsFor(karte[f.key])}
@@ -71,7 +86,19 @@ export function KarteScreen() {
         </div>
       </Card>
 
-      <div className="space-y-5 lg:sticky lg:top-36 lg:self-start">
+      <div className="space-y-5">
+        <ClinicalReview area="karte" />
+        <Card>
+          <button type="button" className="flex w-full items-center justify-between text-left" onClick={() => setMemoOpen(!memoOpen)} aria-expanded={memoOpen}>
+            <span className="text-lg font-bold text-navy-900">元の施術メモ（照合用）</span>
+            <span className="text-sm text-slate-500">{memoOpen ? "閉じる" : "開く"}</span>
+          </button>
+          {memoOpen && (
+            <pre className="mt-3 max-h-[40vh] overflow-auto whitespace-pre-wrap rounded-xl bg-navy-50 p-4 font-sans text-sm leading-relaxed text-navy-900" data-testid="memo-view">
+              {session.memo || "（施術メモが入力されていません）"}
+            </pre>
+          )}
+        </Card>
         <Card>
           <CardTitle title="SalonOne 貼り付け用" />
           <Button variant="gold" size="lg" className="w-full" onClick={copy} disabled={isKarteEmpty(karte)}>

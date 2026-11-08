@@ -3,6 +3,7 @@ import { useApp } from "../state";
 import { findExercise } from "../data/selfcare";
 import { PatientDocument, type ResolvedSelection } from "../components/PatientDocument";
 import { FitToWidth } from "../components/FitToWidth";
+import { ClinicalReview } from "../components/ClinicalReview";
 import { MIND_ICON_COMPONENTS } from "../doc/mindIcons";
 import { PostureFigure } from "../doc/PostureFigure";
 import { BODY_AREAS, MIND_ICONS, POSTURES, guessMindIcon, type MindIcon } from "../doc/postures";
@@ -102,6 +103,11 @@ export function DocumentScreen() {
     .forEach((i) => checks.push({ tone: "info", text: `「${i.exercise.title}」はライブラリに画像がありません` }));
 
   const print = async () => {
+    if (
+      !session.review.docConfirmed &&
+      !window.confirm("患者説明資料の内容の確認（「内容の確認」）がまだ済んでいません。このまま出力しますか？")
+    )
+      return;
     setPrinting(true);
     const root = document.getElementById("print-root");
     const result = root ? await waitForImages(root, 10000) : { failed: 0, pending: 0 };
@@ -128,7 +134,7 @@ export function DocumentScreen() {
               <label className="block">
                 <span className="text-sm font-bold text-gold">あなたの目標（本人の希望・HOPE）</span>
                 <span className="ml-2 text-xs text-slate-500">本人の言葉に近い形で</span>
-                <input className="field mt-1" value={doc.goal} onChange={(e) => patch({ goal: e.target.value })} placeholder="例: 仕事終わりも肩の重さを気にせず過ごしたい" />
+                <input className="field mt-1" data-doc-field="goal" value={doc.goal} onChange={(e) => patch({ goal: e.target.value })} placeholder="例: 仕事終わりも肩の重さを気にせず過ごしたい" />
               </label>
               {!doc.goal.trim() && (
                 <p className="mt-1 rounded-lg bg-amber-50 px-3 py-1.5 text-xs text-amber-900 ring-1 ring-amber-200" data-testid="hope-missing">
@@ -139,18 +145,18 @@ export function DocumentScreen() {
             <label className="block">
               <span className="text-sm font-bold text-sec-pink">今のお身体の状態</span>
               <span className="ml-2 text-xs text-slate-500">評価で確認できた特徴・1行1項目・3項目まで</span>
-              <textarea className="field mt-1" rows={3} value={doc.currentPoints} onChange={(e) => patch({ currentPoints: e.target.value })} placeholder={"例: 首を右に向ける動きに制限がみられました"} />
+              <textarea className="field mt-1" rows={3} data-doc-field="currentPoints" value={doc.currentPoints} onChange={(e) => patch({ currentPoints: e.target.value })} placeholder={"例: 首を右に向ける動きに制限がみられました"} />
             </label>
             <ChangesEditor items={doc.changes} onChange={(changes) => patch({ changes })} />
             <label className="block">
               <span className="text-sm font-bold text-sec-blue">これから目指すお身体の状態</span>
               <span className="ml-2 text-xs text-slate-500">本人の希望に沿った、生活の中での目標</span>
-              <textarea className="field mt-1" rows={3} value={doc.idealPoints} onChange={(e) => patch({ idealPoints: e.target.value })} placeholder={"例: 長時間のデスクワーク後も首や肩を楽に動かせる"} />
+              <textarea className="field mt-1" rows={3} data-doc-field="idealPoints" value={doc.idealPoints} onChange={(e) => patch({ idealPoints: e.target.value })} placeholder={"例: 長時間のデスクワーク後も首や肩を楽に動かせる"} />
             </label>
 
             <div>
               <p className="text-sm font-bold text-navy-900">姿勢のイラスト（①②に表示）</p>
-              <div className="mt-2 grid grid-cols-5 gap-1.5" role="radiogroup" aria-label="姿勢のイラスト">
+              <div className="mt-2 grid grid-cols-5 gap-1.5" role="radiogroup" aria-label="姿勢のイラスト" data-doc-field="posture">
                 <button
                   type="button"
                   role="radio"
@@ -203,7 +209,7 @@ export function DocumentScreen() {
               <label className="block">
                 <span className="text-sm font-bold text-navy-900">次回来院までの目標</span>
                 <span className="ml-2 text-xs text-slate-500">選んだセルフケアをもとに、自宅で取り組むこと</span>
-                <textarea className="field mt-1" rows={2} value={doc.nextGoal} onChange={(e) => patch({ nextGoal: e.target.value })} placeholder="例: 胸筋ストレッチを無理のない範囲で続け、仕事終わりの肩の状態を確かめましょう" />
+                <textarea className="field mt-1" rows={2} data-doc-field="nextGoal" value={doc.nextGoal} onChange={(e) => patch({ nextGoal: e.target.value })} placeholder="例: 胸筋ストレッチを無理のない範囲で続け、仕事終わりの肩の状態を確かめましょう" />
               </label>
               <label className="block">
                 <span className="text-sm font-bold text-navy-900">次回確認すること</span>
@@ -225,6 +231,8 @@ export function DocumentScreen() {
             </div>
           </div>
         </Card>
+
+        <ClinicalReview area="patient" />
 
         <Card>
           <CardTitle title="印刷前チェック" />
@@ -273,7 +281,7 @@ export function DocumentScreen() {
 function MindEditor({ items, onChange }: { items: MindItem[]; onChange: (items: MindItem[]) => void }) {
   const update = (i: number, p: Partial<MindItem>) => onChange(items.map((m, j) => (j === i ? { ...m, ...p } : m)));
   return (
-    <div>
+    <div data-doc-field="mindItems">
       <p className="text-sm font-bold text-sec-green">③ 意識していくこと</p>
       <p className="text-xs text-slate-500">アイコンとひとこと（25文字前後）。3項目までがおすすめです。</p>
       <ul className="mt-2 space-y-2">
@@ -321,7 +329,7 @@ function MindEditor({ items, onChange }: { items: MindItem[]; onChange: (items: 
 function ChangesEditor({ items, onChange }: { items: ChangeItem[]; onChange: (items: ChangeItem[]) => void }) {
   const update = (i: number, p: Partial<ChangeItem>) => onChange(items.map((c, j) => (j === i ? { ...c, ...p } : c)));
   return (
-    <div data-testid="changes-editor">
+    <div data-testid="changes-editor" data-doc-field="changes">
       <p className="text-sm font-bold text-[#2a7f8f]">今日確認できた変化</p>
       <p className="text-xs text-slate-500">施術前後に評価した場合だけ入力します（角度・痛みのスコアは実測値のみ）。空欄なら資料に表示しません。</p>
       <ul className="mt-2 space-y-2">

@@ -66,6 +66,18 @@ export type SessionMeta = {
   patientName: string;
 };
 
+/** 施術者による確認（AIの生成内容を確定する前の承認） */
+export type Review = {
+  /** 「確認済み」にした指摘の ID（src/review/clinicalCheck.ts） */
+  approved: string[];
+  /** カルテの内容を施術者が確認した */
+  karteConfirmed: boolean;
+  /** 患者説明資料の内容を施術者が確認した */
+  docConfirmed: boolean;
+};
+
+export const emptyReview = (): Review => ({ approved: [], karteConfirmed: false, docConfirmed: false });
+
 export type Session = {
   meta: SessionMeta;
   memo: string;
@@ -76,6 +88,8 @@ export type Session = {
   patientDoc: PatientDoc;
   /** AIが挙げた確認事項・安全上の懸念 */
   confirmations: string[];
+  /** 施術者による確認・承認の状態 */
+  review: Review;
 };
 
 const today = () => {
@@ -92,6 +106,7 @@ export const emptySession = (): Session => ({
   karte: emptyKarte(),
   patientDoc: emptyPatientDoc(),
   confirmations: [],
+  review: emptyReview(),
 });
 
 export type SessionAction =
@@ -109,7 +124,9 @@ export type SessionAction =
   | { type: "setPatientDoc"; patch: Partial<PatientDoc> }
   | { type: "setConfirmations"; items: string[] }
   /** AIの出力を「その時点の最新の状態」に反映する（生成中に編集された内容を失わないため） */
-  | { type: "applyAI"; output: AIOutput; parts?: AIPart[] };
+  | { type: "applyAI"; output: AIOutput; parts?: AIPart[] }
+  | { type: "approveCheck"; id: string; approved: boolean }
+  | { type: "setConfirmed"; part: "karte" | "doc"; value: boolean };
 
 export function sessionReducer(state: Session, action: SessionAction): Session {
   switch (action.type) {
@@ -160,8 +177,31 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
       return { ...state, patientDoc: { ...state.patientDoc, ...action.patch } };
     case "setConfirmations":
       return { ...state, confirmations: action.items };
-    case "applyAI":
-      return applyAIOutput(state, action.output, action.parts);
+    case "applyAI": {
+      // AIで作り直した部分は、確認をやり直す
+      const parts = action.parts ?? ["karte", "patient"];
+      const next = applyAIOutput(state, action.output, parts);
+      const r = state.review;
+      return {
+        ...next,
+        review: {
+          approved: r.approved.filter((id) => !parts.some((p) => id.startsWith(`${p}:`))),
+          karteConfirmed: parts.includes("karte") ? false : r.karteConfirmed,
+          docConfirmed: parts.includes("patient") ? false : r.docConfirmed,
+        },
+      };
+    }
+    case "approveCheck": {
+      const approved = action.approved
+        ? [...new Set([...state.review.approved, action.id])]
+        : state.review.approved.filter((x) => x !== action.id);
+      return { ...state, review: { ...state.review, approved } };
+    }
+    case "setConfirmed":
+      return {
+        ...state,
+        review: { ...state.review, [action.part === "karte" ? "karteConfirmed" : "docConfirmed"]: action.value },
+      };
   }
 }
 
