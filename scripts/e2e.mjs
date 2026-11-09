@@ -573,13 +573,15 @@ try {
   const steps0 = await stepDone();
   await p7.getByRole("button", { name: "サンプル（架空）" }).click();
   const steps1 = await stepDone();
+  const wfStep1Text = await p7.getByTestId("workflow-steps").locator("button[data-step='1']").innerText();
   await p7.getByRole("tab", { name: "ChatGPT／Claudeにコピー" }).click();
   await p7.getByRole("button", { name: "返答例（架空）を貼る" }).click();
   await p7.getByRole("button", { name: "③ 取り込む" }).click();
   const steps2 = await stepDone();
-  const step3Text = await p7.getByTestId("workflow-steps").locator("button[data-step='3']").innerText();
-  // サンプルはセルフケア選択済みのため、読み込み直後に④も完了。取り込み後は「確認待ちの運動」があるため④は未完了に戻る
-  check("工程表示: 入力 → AI作成 の進み具合と、未確認・確認待ちを表示する", steps0 === "・・・・・" && steps1 === "✓・・✓・" && steps2 === "✓✓・・・" && step3Text.includes("未確認"), `${steps0} → ${steps1} → ${steps2} / ${step3Text.replace(/\n/g, " ")}`);
+  const step3Text = await p7.getByTestId("workflow-steps").locator("button[data-step='2']").innerText();
+  // 工程は4つ（入力・AI作成／確認／セルフケア／コピー・PDF）。サンプルはセルフケア選択済みのため読み込み直後に③が完了、
+  // メモはあるが AI 未作成なので①に「AI未作成」。取り込み後は「確認待ちの運動」があるため③は未完了に戻る
+  check("工程表示: 入力 → AI作成 の進み具合と、未確認・確認待ちを表示する", steps0 === "・・・・" && steps1 === "・・✓・" && wfStep1Text.includes("AI未作成") && steps2 === "✓・・・" && step3Text.includes("未確認"), `${steps0} → ${steps1} → ${steps2} / ${step3Text.replace(/\n/g, " ")}`);
 
   // 作成済みの内容がある状態で取り込み直すと、上書きの確認が出る
   dialogs7.length = 0;
@@ -634,7 +636,7 @@ try {
   await p7.locator("[data-screen=document]").getByRole("button", { name: /PDFを出力/ }).click();
   await p7.waitForTimeout(500);
   const stepsEnd = await stepDone();
-  check("資料画面からカルテのコピーと PDF 出力ができ、5つの工程がすべて完了になる", copied.startsWith("【プラン・頻度】") && stepsEnd === "✓✓✓✓✓", `工程 ${stepsEnd}`);
+  check("資料画面からカルテのコピーと PDF 出力ができ、4つの工程がすべて完了になる", copied.startsWith("【プラン・頻度】") && stepsEnd === "✓✓✓✓", `工程 ${stepsEnd}`);
 
   // ページを開き直すと、お気に入りは残り、患者の入力内容は残らない
   await p7.reload();
