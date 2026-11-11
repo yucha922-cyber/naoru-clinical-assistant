@@ -255,6 +255,7 @@ try {
   check("あなたの目標（本人のHOPE）が表示される", (await page.locator("[data-doc-goal]").innerText()).includes("仕事終わりも肩を気にせず過ごしたい"));
   const docText3 = await page.getByTestId("a4-sheet").innerText();
   const newSections = ["あなたの目標", "今のお身体の状態", "今日確認できた変化", "これから目指すお身体の状態", "日常生活で意識すること", "今日のセルフケア", "次回来院までの目標"];
+  check("資料に会員コードの注意書きを表示しない", !docText3.includes("会員コード"));
   check("新しい構成（7項目）がすべて表示される", newSections.every((t) => docText3.includes(t)), newSections.filter((t) => !docText3.includes(t)).join(",") || "OK");
   check("今日確認できた変化に、メモの実測値（45°→55°、10→4）が表示される", /首を右に向ける動き[\s\S]*45°[\s\S]*55°/.test(docText3) && /施術直後の変化です/.test(docText3));
   check("運動の目的（ライブラリの説明）が表示される", (await page.locator("#print-root [data-doc-purpose]").count()) === 3);
