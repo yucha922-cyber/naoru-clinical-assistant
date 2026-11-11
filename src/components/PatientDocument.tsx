@@ -312,7 +312,6 @@ export function PatientDocument({
   const date = meta.visitDate ? new Date(`${meta.visitDate}T00:00:00`) : null;
   const dateText =
     date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" }) : "";
-  const needsMemberNote = items.some((i) => i.exercise.requiresMemberCode);
 
   return (
     <div id="print-root">
@@ -467,11 +466,6 @@ export function PatientDocument({
                     <ExerciseCard key={it.exercise.slug} index={i + 1} exercise={it.exercise} selection={it.selection} showSteps={showSteps} d={d} />
                   ))}
                 </div>
-              )}
-              {needsMemberNote && (
-                <p className="mt-[1mm] text-right text-slate-500" style={{ fontSize: FONT.caption }} data-block>
-                  {APP_CONFIG.memberCodeNote}
-                </p>
               )}
             </section>
           )}
